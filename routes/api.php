@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Modules\Employee\Http\Controllers\EmployeeController;
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+| Load API routes from organized folders
+*/
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('employees', EmployeeController::class)->names('employee');
-});
+require __DIR__ . '/api/Employee/v1.php';

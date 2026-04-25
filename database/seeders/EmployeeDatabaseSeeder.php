@@ -11,6 +11,11 @@ class EmployeeDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->call([]);
+        $this->call([
+            EmployeeTypeSeeder::class,
+            EmployeeSeeder::class,
+            AttendanceSeeder::class,
+            PermissionRequestSeeder::class,
+        ]);
     }
 }
