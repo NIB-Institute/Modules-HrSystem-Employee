@@ -67,6 +67,7 @@ Route::middleware(['auth', 'verified', 'auto.permission'])->prefix('dashboard')-
     Route::get('employees/departments', [EmployeeController::class, 'getDepartments'])->name('employees.departments');
 
     // Export/Import routes (before parameterized routes)
+    Route::get('employees/export-options', [EmployeeImportExportController::class, 'exportOptions'])->name('employees.export-options');
     Route::get('employees/export', [EmployeeImportExportController::class, 'export'])->name('employees.export');
     Route::get('employees/import', [EmployeeImportExportController::class, 'showImport'])->name('employees.import');
     Route::post('employees/import', [EmployeeImportExportController::class, 'import'])->name('employees.import.store');

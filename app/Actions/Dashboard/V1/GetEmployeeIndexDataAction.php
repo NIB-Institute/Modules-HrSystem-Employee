@@ -3,6 +3,7 @@
 namespace Modules\Employee\Actions\Dashboard\V1;
 
 use Illuminate\Support\Facades\DB;
+use Modules\Employee\Exports\EmployeesExport;
 use Modules\Employee\Http\Resources\Dashboard\V1\EmployeeResource;
 use Modules\Employee\Models\Attendance;
 use Modules\Employee\Models\Employee;
@@ -117,6 +118,8 @@ class GetEmployeeIndexDataAction
             'attendanceStats' => $attendanceStats,
             'employeeTypes' => $employeeTypes,
             'schools' => $schools,
+            // Column catalogue for the reusable <ExportDialog />
+            'exportColumns' => (new EmployeesExport())->exportableColumnList(),
         ];
     }
 

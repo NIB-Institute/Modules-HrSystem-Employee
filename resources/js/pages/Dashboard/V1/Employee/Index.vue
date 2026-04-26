@@ -172,15 +172,10 @@ const handleCreate = () => {
     router.visit('/dashboard/employees/create');
 };
 
+// Open the column-selectable export/template modal (momentum-modal
+// overlay over the index page).
 const handleExport = () => {
-    const params = new URLSearchParams();
-    const filters = getFilterParams();
-    Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined) {
-            params.append(key, String(value));
-        }
-    });
-    window.location.href = `/dashboard/employees/export?${params.toString()}`;
+    router.visit('/dashboard/employees/export-options');
 };
 
 const handleImport = () => {
@@ -188,7 +183,7 @@ const handleImport = () => {
 };
 
 const handleDownloadTemplate = () => {
-    window.location.href = '/dashboard/employees/template';
+    router.visit('/dashboard/employees/export-options');
 };
 
 const handleTrash = () => {

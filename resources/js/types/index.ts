@@ -363,6 +363,8 @@ export interface EmployeeIndexProps {
     stats: EmployeeStats;
     attendanceStats: EmployeeAttendanceStats;
     schools: SchoolOption[];
+    /** Column catalogue for the reusable <ExportDialog />. */
+    exportColumns: { key: string; label: string; default?: boolean }[];
 }
 
 export interface EmployeeShowProps {

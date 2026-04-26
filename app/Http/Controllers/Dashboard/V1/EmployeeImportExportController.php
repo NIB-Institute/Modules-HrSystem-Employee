@@ -3,9 +3,12 @@
 namespace Modules\Employee\Http\Controllers\Dashboard\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ExportRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Maatwebsite\Excel\Excel as ExcelType;
+use Momentum\Modal\Modal;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -22,15 +25,46 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class EmployeeImportExportController extends Controller
 {
     /**
-     * Export employees to Excel.
+     * Export employees to Excel/CSV with user-picked columns.
+     *
+     * Accepts ExportRequest payload (columns[], format, mode, filters)
+     * so a single endpoint serves both the Export and Download Template
+     * actions of the reusable <ExportDialog />.
      */
-    public function export(Request $request): BinaryFileResponse
+    public function export(ExportRequest $request): BinaryFileResponse
     {
-        $filters = $request->only(['search', 'status', 'employee_type', 'school_id', 'department_id']);
+        $format = $request->fileFormat();
+        $writerType = $format === 'csv' ? ExcelType::CSV : ExcelType::XLSX;
 
-        $filename = 'employees_' . now()->format('Y-m-d_His') . '.xlsx';
+        $export = (new EmployeesExport($request->tableFilters()))
+            ->setSelectedColumns($request->selectedColumns())
+            ->asTemplate($request->isTemplate());
 
-        return Excel::download(new EmployeesExport($filters), $filename);
+        $prefix = $request->isTemplate() ? 'employees_template_' : 'employees_';
+        $filename = $prefix . now()->format('Y-m-d_His') . '.' . $format;
+
+        return Excel::download($export, $filename, $writerType);
+    }
+
+    /**
+     * Open the Export / Download Template chooser as a momentum modal
+     * overlaid on the employees index.
+     */
+    public function exportOptions(): Modal
+    {
+        return Inertia::modal('employee::Dashboard/V1/Employee/Export', [
+            'exportColumns' => (new EmployeesExport())->exportableColumnList(),
+        ])->baseRoute('employee.employees.index');
+    }
+
+    /**
+     * Expose the available export columns as JSON (for non-Inertia callers).
+     */
+    public function exportColumns(): JsonResponse
+    {
+        return response()->json([
+            'columns' => (new EmployeesExport())->exportableColumnList(),
+        ]);
     }
 
     /**

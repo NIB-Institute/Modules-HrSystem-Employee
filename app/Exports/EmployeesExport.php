@@ -2,35 +2,149 @@
 
 namespace Modules\Employee\Exports;
 
+use App\Concerns\Exports\HasSelectableColumns;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Modules\Employee\Models\Employee;
-use Illuminate\Database\Eloquent\Builder;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class EmployeesExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
-    protected array $filters;
+    use HasSelectableColumns;
 
-    public function __construct(array $filters = [])
+    /**
+     * When true, query() returns no rows so the file becomes a header-
+     * only template ready for re-import.
+     */
+    protected bool $templateMode = false;
+
+    /**
+     * @param  array<string, mixed>  $filters
+     */
+    public function __construct(protected array $filters = [])
     {
-        $this->filters = $filters;
+    }
+
+    public function asTemplate(bool $template = true): static
+    {
+        $this->templateMode = $template;
+
+        return $this;
     }
 
     /**
-     * Build the query for export.
+     * Full set of exportable columns. Order here is the order written
+     * to the spreadsheet (when not overridden by the user picker).
+     *
+     * @return array<string, array{label: string, value: callable, default?: bool}>
      */
+    public function columnMap(): array
+    {
+        return [
+            'employee_code' => [
+                'label' => 'Employee Code',
+                'value' => fn ($e) => $e->employee_code,
+            ],
+            'first_name' => [
+                'label' => 'First Name',
+                'value' => fn ($e) => $e->first_name,
+            ],
+            'last_name' => [
+                'label' => 'Last Name',
+                'value' => fn ($e) => $e->last_name,
+            ],
+            'email' => [
+                'label' => 'Email',
+                'value' => fn ($e) => $e->email,
+            ],
+            'phone_number' => [
+                'label' => 'Phone Number',
+                'value' => fn ($e) => $e->phone_number,
+            ],
+            'gender' => [
+                'label' => 'Gender',
+                'value' => fn ($e) => $e->gender ? ucfirst($e->gender) : '',
+            ],
+            'date_of_birth' => [
+                'label' => 'Date of Birth',
+                'value' => fn ($e) => $e->date_of_birth?->format('Y-m-d'),
+            ],
+            'birth_place' => [
+                'label' => 'Birth Place',
+                'value' => fn ($e) => $e->birth_place,
+                'default' => false,
+            ],
+            'current_address' => [
+                'label' => 'Current Address',
+                'value' => fn ($e) => $e->current_address,
+                'default' => false,
+            ],
+            'school' => [
+                'label' => 'School',
+                'value' => fn ($e) => $e->school?->name,
+            ],
+            'department' => [
+                'label' => 'Department',
+                'value' => fn ($e) => $e->department?->name,
+            ],
+            'employee_type_name' => [
+                'label' => 'Employee Type',
+                'value' => fn ($e) => $e->employeeType?->name,
+            ],
+            'job_title' => [
+                'label' => 'Job Title',
+                'value' => fn ($e) => $e->job_title,
+            ],
+            'employment_type' => [
+                'label' => 'Employment Type',
+                'value' => fn ($e) => $this->formatEmployeeType($e->employee_type),
+            ],
+            'salary' => [
+                'label' => 'Salary',
+                'value' => fn ($e) => $e->salary,
+                'default' => false,
+            ],
+            'hire_date' => [
+                'label' => 'Hire Date',
+                'value' => fn ($e) => $e->hire_date?->format('Y-m-d'),
+            ],
+            'probation_date' => [
+                'label' => 'Probation Date',
+                'value' => fn ($e) => $e->probation_date?->format('Y-m-d'),
+                'default' => false,
+            ],
+            'probation_end_date' => [
+                'label' => 'Probation End Date',
+                'value' => fn ($e) => $e->probation_end_date?->format('Y-m-d'),
+                'default' => false,
+            ],
+            'status' => [
+                'label' => 'Status',
+                'value' => fn ($e) => $e->status ? 'Active' : 'Inactive',
+            ],
+            'created_at' => [
+                'label' => 'Created At',
+                'value' => fn ($e) => $e->created_at?->format('Y-m-d H:i:s'),
+                'default' => false,
+            ],
+        ];
+    }
+
     public function query(): Builder
     {
+        if ($this->templateMode) {
+            return Employee::query()->whereRaw('1 = 0');
+        }
+
         $query = Employee::query()
             ->with(['school', 'department', 'employeeType'])
             ->latest();
 
-        // Apply filters
-        if (!empty($this->filters['search'])) {
+        if (! empty($this->filters['search'])) {
             $search = $this->filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
@@ -47,86 +161,34 @@ class EmployeesExport implements FromQuery, WithHeadings, WithMapping, ShouldAut
             }
         }
 
-        if (!empty($this->filters['employee_type']) && $this->filters['employee_type'] !== 'all') {
+        if (! empty($this->filters['employee_type']) && $this->filters['employee_type'] !== 'all') {
             $query->where('employee_type', $this->filters['employee_type']);
         }
 
-        if (!empty($this->filters['school_id']) && $this->filters['school_id'] !== 'all') {
+        if (! empty($this->filters['school_id']) && $this->filters['school_id'] !== 'all') {
             $query->where('school_id', $this->filters['school_id']);
         }
 
-        if (!empty($this->filters['department_id']) && $this->filters['department_id'] !== 'all') {
+        if (! empty($this->filters['department_id']) && $this->filters['department_id'] !== 'all') {
             $query->where('department_id', $this->filters['department_id']);
         }
 
         return $query;
     }
 
-    /**
-     * Column headings.
-     */
     public function headings(): array
     {
-        return [
-            'Employee Code',
-            'First Name',
-            'Last Name',
-            'Email',
-            'Phone Number',
-            'Gender',
-            'Date of Birth',
-            'Birth Place',
-            'Current Address',
-            'School',
-            'Department',
-            'Employee Type',
-            'Job Title',
-            'Employment Type',
-            'Salary',
-            'Hire Date',
-            'Probation Date',
-            'Probation End Date',
-            'Status',
-            'Created At',
-        ];
+        return $this->selectedHeadings();
     }
 
-    /**
-     * Map each row for export.
-     */
-    public function map($employee): array
+    public function map($row): array
     {
-        return [
-            $employee->employee_code,
-            $employee->first_name,
-            $employee->last_name,
-            $employee->email,
-            $employee->phone_number,
-            $employee->gender ? ucfirst($employee->gender) : '',
-            $employee->date_of_birth?->format('Y-m-d'),
-            $employee->birth_place,
-            $employee->current_address,
-            $employee->school?->name,
-            $employee->department?->name,
-            $employee->employeeType?->name,
-            $employee->job_title,
-            $this->formatEmployeeType($employee->employee_type),
-            $employee->salary,
-            $employee->hire_date?->format('Y-m-d'),
-            $employee->probation_date?->format('Y-m-d'),
-            $employee->probation_end_date?->format('Y-m-d'),
-            $employee->status ? 'Active' : 'Inactive',
-            $employee->created_at?->format('Y-m-d H:i:s'),
-        ];
+        return $this->selectedRow($row);
     }
 
-    /**
-     * Style the worksheet.
-     */
     public function styles(Worksheet $sheet): array
     {
         return [
-            // Style the header row
             1 => [
                 'font' => [
                     'bold' => true,
@@ -140,9 +202,6 @@ class EmployeesExport implements FromQuery, WithHeadings, WithMapping, ShouldAut
         ];
     }
 
-    /**
-     * Format employee type for display.
-     */
     protected function formatEmployeeType(?string $type): string
     {
         return match ($type) {
