@@ -17,23 +17,10 @@ class EmployeesExport implements FromQuery, WithHeadings, WithMapping, ShouldAut
     use HasSelectableColumns;
 
     /**
-     * When true, query() returns no rows so the file becomes a header-
-     * only template ready for re-import.
-     */
-    protected bool $templateMode = false;
-
-    /**
      * @param  array<string, mixed>  $filters
      */
     public function __construct(protected array $filters = [])
     {
-    }
-
-    public function asTemplate(bool $template = true): static
-    {
-        $this->templateMode = $template;
-
-        return $this;
     }
 
     /**
@@ -136,7 +123,7 @@ class EmployeesExport implements FromQuery, WithHeadings, WithMapping, ShouldAut
 
     public function query(): Builder
     {
-        if ($this->templateMode) {
+        if ($this->isTemplateMode()) {
             return Employee::query()->whereRaw('1 = 0');
         }
 
