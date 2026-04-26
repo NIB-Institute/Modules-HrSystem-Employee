@@ -2,7 +2,6 @@
 
 namespace Modules\Employee\Providers;
 
-use App\Services\MenuService;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
@@ -29,113 +28,8 @@ class EmployeeServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
-        $this->registerMenuItems();
-    }
-
-    /**
-     * Register menu items for the Employee module.
-     */
-    protected function registerMenuItems(): void
-    {
-        $this->app->booted(function () {
-            MenuService::addMenuItem(
-                menu: 'primary',
-                id: 'employee',
-                title: __('Employees'),
-                url: route('employee.employees.index'),
-                icon: 'Users',
-                order: 50,
-                permissions: 'employees.view_any',
-                route: 'employee.*'
-            );
-
-            MenuService::addSubmenuItem(
-                'primary',
-                'employee',
-                __('All Employees'),
-                route('employee.employees.index'),
-                10,
-                'employees.view_any',
-                'employee.employees.*',
-                'Users'
-            );
-
-            MenuService::addSubmenuItem(
-                'primary',
-                'employee',
-                __('Employee Types'),
-                route('employee.employee-types.index'),
-                20,
-                'employee_types.view_any',
-                'employee.employee-types.*',
-                'Tags'
-            );
-
-            if (\Route::has('employee.attendances.index')) {
-                MenuService::addSubmenuItem(
-                    'primary',
-                    'employee',
-                    __('Attendance'),
-                    route('employee.attendances.index'),
-                    30,
-                    'attendances.view_any',
-                    'employee.attendances.*',
-                    'ClipboardCheck'
-                );
-            }
-
-            if (\Route::has('employee.attendances.scanner')) {
-                MenuService::addSubmenuItem(
-                    'primary',
-                    'employee',
-                    __('QR Scanner'),
-                    route('employee.attendances.scanner'),
-                    40,
-                    'attendances.scan_qr',
-                    'employee.attendances.scanner',
-                    'QrCode'
-                );
-            }
-
-            if (\Route::has('employee.locations.index')) {
-                MenuService::addSubmenuItem(
-                    'primary',
-                    'employee',
-                    __('Scan Locations'),
-                    route('employee.locations.index'),
-                    50,
-                    'locations.view_any',
-                    'employee.locations.*',
-                    'MapPin'
-                );
-            }
-
-            if (\Route::has('employee.permission-requests.index')) {
-                MenuService::addSubmenuItem(
-                    'primary',
-                    'employee',
-                    __('Permission Requests'),
-                    route('employee.permission-requests.index'),
-                    60,
-                    'permission_requests.view_any',
-                    'employee.permission-requests.*',
-                    'FileText'
-                );
-            }
-
-            if (\Route::has('employee.attendances.self-service')) {
-                MenuService::addSubmenuItem(
-                    'primary',
-                    'employee',
-                    __('Self Service'),
-                    route('employee.attendances.self-service'),
-                    70,
-                    null, // No special permission - authenticated employees only
-                    'employee.attendances.self-service',
-                    'LogIn'
-                );
-            }
-        });
+        // Sidebar menu is now registered per-request by
+        // Modules\Employee\Http\Middleware\DashboardMiddlewareHandle.
     }
 
     /**
