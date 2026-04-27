@@ -24,7 +24,7 @@ class DashboardMiddlewareHandle
             url: route('employee.employees.index'),
             icon: 'Users',
             order: 50,
-            permissions: PermissionEnum::VIEW_EMPLOYEES->value,
+            permissions: PermissionEnum::EMPLOYEES_VIEW_ANY->value,
             route: 'employee.*',
         );
 
@@ -34,7 +34,7 @@ class DashboardMiddlewareHandle
             __('All Employees'),
             route('employee.employees.index'),
             10,
-            PermissionEnum::VIEW_EMPLOYEES->value,
+            PermissionEnum::EMPLOYEES_VIEW_ANY->value,
             'employee.employees.*',
             'Users',
         );
@@ -45,7 +45,7 @@ class DashboardMiddlewareHandle
             __('Employee Types'),
             route('employee.employee-types.index'),
             20,
-            PermissionEnum::VIEW_EMPLOYEE_TYPES->value,
+            PermissionEnum::EMPLOYEE_TYPES_VIEW_ANY->value,
             'employee.employee-types.*',
             'Tags',
         );
@@ -56,7 +56,7 @@ class DashboardMiddlewareHandle
             __('Attendance'),
             route('employee.attendances.index'),
             30,
-            PermissionEnum::VIEW_ATTENDANCES->value,
+            PermissionEnum::ATTENDANCES_VIEW_ANY->value,
             'employee.attendances.*',
             'ClipboardCheck',
         );
@@ -67,7 +67,7 @@ class DashboardMiddlewareHandle
             __('QR Scanner'),
             route('employee.attendances.scanner'),
             40,
-            PermissionEnum::SCAN_ATTENDANCE_QR->value,
+            PermissionEnum::ATTENDANCES_SCAN_QR->value,
             'employee.attendances.scanner',
             'QrCode',
         );
@@ -78,7 +78,7 @@ class DashboardMiddlewareHandle
             __('Scan Locations'),
             route('employee.locations.index'),
             50,
-            PermissionEnum::VIEW_LOCATIONS->value,
+            PermissionEnum::LOCATIONS_VIEW_ANY->value,
             'employee.locations.*',
             'MapPin',
         );
@@ -89,7 +89,7 @@ class DashboardMiddlewareHandle
             __('Permission Requests'),
             route('employee.permission-requests.index'),
             60,
-            PermissionEnum::VIEW_PERMISSION_REQUESTS->value,
+            PermissionEnum::PERMISSION_REQUESTS_VIEW_ANY->value,
             'employee.permission-requests.*',
             'FileText',
         );
