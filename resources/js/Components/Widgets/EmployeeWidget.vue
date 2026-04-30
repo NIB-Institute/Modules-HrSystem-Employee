@@ -62,11 +62,21 @@ export interface RecentEmployee {
     created_at: string;
 }
 
+export interface DashboardWidgetItem {
+    id: number;
+    name: string;
+    module: string;
+    chart_type: string | null;
+    sort_order: number;
+    status: boolean;
+}
+
 export interface EmployeeWidgetProps {
     metrics: EmployeeMetrics;
     attendanceTrend: AttendanceTrendPoint[];
     growthTrend: GrowthTrendPoint[];
     recentEmployees?: RecentEmployee[];
+    widgets?: DashboardWidgetItem[];
     dateRange?: string;
     loading?: boolean;
     showStats?: boolean;
@@ -76,6 +86,7 @@ export interface EmployeeWidgetProps {
 }
 
 const props = withDefaults(defineProps<EmployeeWidgetProps>(), {
+    widgets: () => [],
     dateRange: '30d',
     loading: false,
     showStats: true,
@@ -83,6 +94,24 @@ const props = withDefaults(defineProps<EmployeeWidgetProps>(), {
     showGrowth: true,
     showRecent: true,
 });
+
+const widgetByChartType = computed(() => {
+    const map: Record<string, DashboardWidgetItem> = {};
+    for (const w of props.widgets ?? []) {
+        if (w.chart_type) map[w.chart_type] = w;
+    }
+    return map;
+});
+
+const orderOf = (chartType: string, fallback: number) => {
+    return widgetByChartType.value[chartType]?.sort_order ?? fallback;
+};
+
+const enabled = (chartType: string, showProp: boolean) => {
+    const widget = widgetByChartType.value[chartType];
+    if (widget) return widget.status && showProp;
+    return showProp;
+};
 
 const emit = defineEmits<{
     (e: 'dateRangeChange', value: string): void;
@@ -158,9 +187,9 @@ const formatStatus = (status: string | boolean): string => {
 </script>
 
 <template>
-    <div class="space-y-6">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <!-- Header with Date Filter -->
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:col-span-2" :style="{ order: -1 }">
             <div>
                 <h2 class="text-xl font-semibold tracking-tight">{{ __('Employee Overview') }}</h2>
                 <p class="text-sm text-muted-foreground">{{ __('Track employee attendance and growth') }}</p>
@@ -188,7 +217,7 @@ const formatStatus = (status: string | boolean): string => {
         </div>
 
         <!-- Key Metrics Grid -->
-        <div v-if="showStats" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div v-if="enabled('stats', showStats)" :style="{ order: orderOf('stats', 1) }" class="grid gap-4 md:grid-cols-2 lg:col-span-2 lg:grid-cols-4">
             <Card>
                 <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle class="text-sm font-medium">{{ __('Total Employees') }}</CardTitle>
@@ -247,10 +276,8 @@ const formatStatus = (status: string | boolean): string => {
             </Card>
         </div>
 
-        <!-- Charts Section -->
-        <div v-if="showAttendance || showGrowth" class="grid gap-6 lg:grid-cols-2">
-            <!-- Attendance Trend Chart -->
-            <Card v-if="showAttendance">
+        <!-- Attendance Trend Chart -->
+        <Card v-if="enabled('bar', showAttendance)" :style="{ order: orderOf('bar', 2) }">
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2">
                         <Calendar class="h-5 w-5" />
@@ -288,8 +315,8 @@ const formatStatus = (status: string | boolean): string => {
                 </CardContent>
             </Card>
 
-            <!-- Growth Trend Chart -->
-            <Card v-if="showGrowth">
+        <!-- Growth Trend Chart -->
+        <Card v-if="enabled('area', showGrowth)" :style="{ order: orderOf('area', 3) }">
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2">
                         <TrendingUp class="h-5 w-5" />
@@ -321,10 +348,9 @@ const formatStatus = (status: string | boolean): string => {
                     </ChartContainer>
                 </CardContent>
             </Card>
-        </div>
 
         <!-- Recent Employees -->
-        <Card v-if="showRecent && recentEmployees && recentEmployees.length > 0">
+        <Card v-if="showRecent && recentEmployees && recentEmployees.length > 0" class="lg:col-span-2" :style="{ order: 999 }">
             <CardHeader>
                 <div class="flex items-center justify-between">
                     <div>
