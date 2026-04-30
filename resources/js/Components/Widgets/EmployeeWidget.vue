@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChartContainer, ChartTooltip, ChartCrosshair } from '@/components/ui/chart';
+import { ChartContainer,   } from '@/components/ui/chart';
 import {
     VisXYContainer,
     VisStackedBar,
@@ -15,18 +15,19 @@ import {
 import {
     Users,
     UserCheck,
-    UserX,
     Calendar,
     RefreshCw,
     ArrowUpRight,
     Building2,
-    Clock,
     Mail,
     Eye,
     TrendingUp,
 } from 'lucide-vue-next';
 import { Link } from '@inertiajs/vue3';
 import type { ChartConfig } from '@/components/ui/chart';
+import { useTranslation } from '@/composables/useTranslation';
+
+const {__}  = useTranslation();
 
 // Types
 export interface EmployeeMetrics {
@@ -91,21 +92,21 @@ const emit = defineEmits<{
 const selectedDateRange = ref(props.dateRange);
 
 const dateRangeOptions = [
-    { value: 'today', label: 'Today' },
-    { value: '7d', label: 'Last 7 Days' },
-    { value: '30d', label: 'Last 30 Days' },
-    { value: '90d', label: 'Last 90 Days' },
-    { value: 'year', label: 'This Year' },
+    { value: 'today', label: __('Today') },
+    { value: '7d', label: __('Last 7 Days') },
+    { value: '30d', label: __('Last 30 Days') },
+    { value: '90d', label: __('Last 90 Days') },
+    { value: 'year', label: __('This Year') },
 ];
 
 // Chart configs
 const attendanceChartConfig: ChartConfig = {
-    present: { label: 'Present', color: 'var(--chart-2)' },
-    absent: { label: 'Absent', color: 'var(--chart-4)' },
+    present: { label: __('Present'), color: 'var(--chart-2)' },
+    absent: { label: __('Absent'), color: 'var(--chart-4)' },
 };
 
 const growthChartConfig: ChartConfig = {
-    value: { label: 'New Employees', color: 'var(--chart-1)' },
+    value: { label: __('New Employees'), color: 'var(--chart-1)' },
 };
 
 // Computed
@@ -150,9 +151,9 @@ const getStatusBadgeVariant = (status: string | boolean): 'default' | 'secondary
 
 const formatStatus = (status: string | boolean): string => {
     if (typeof status === 'boolean') {
-        return status ? 'Active' : 'Inactive';
+        return status ? __('Active') : __('Inactive');
     }
-    return status || 'Unknown';
+    return status || __('Unknown');
 };
 </script>
 
@@ -161,14 +162,14 @@ const formatStatus = (status: string | boolean): string => {
         <!-- Header with Date Filter -->
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h2 class="text-xl font-semibold tracking-tight">Employee Overview</h2>
-                <p class="text-sm text-muted-foreground">Track employee attendance and growth</p>
+                <h2 class="text-xl font-semibold tracking-tight">{{ __('Employee Overview') }}</h2>
+                <p class="text-sm text-muted-foreground">{{ __('Track employee attendance and growth') }}</p>
             </div>
             <div class="flex items-center gap-2">
                 <Select v-model="selectedDateRange">
                     <SelectTrigger class="w-[160px]">
                         <Calendar class="mr-2 h-4 w-4" />
-                        <SelectValue placeholder="Select period" />
+                        <SelectValue :placeholder="__('Select period')" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem
@@ -190,7 +191,7 @@ const formatStatus = (status: string | boolean): string => {
         <div v-if="showStats" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
                 <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium">Total Employees</CardTitle>
+                    <CardTitle class="text-sm font-medium">{{ __('Total Employees') }}</CardTitle>
                     <Users class="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -203,45 +204,45 @@ const formatStatus = (status: string | boolean): string => {
                         <span :class="growthIndicator.isPositive ? 'text-green-500' : 'text-red-500'">
                             {{ growthIndicator.isPositive ? '+' : '-' }}{{ formatPercent(growthIndicator.value) }}
                         </span>
-                        <span class="ml-1 text-muted-foreground">from last month</span>
+                        <span class="ml-1 text-muted-foreground">{{ __('from last month') }}</span>
                     </div>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium">Active Employees</CardTitle>
+                    <CardTitle class="text-sm font-medium">{{ __('Active Employees') }}</CardTitle>
                     <UserCheck class="h-4 w-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
                     <div class="text-2xl font-bold text-green-600">{{ formatNumber(metrics.active) }}</div>
                     <p class="text-xs text-muted-foreground">
-                        {{ formatNumber(metrics.inactive) }} inactive
+                        {{ formatNumber(metrics.inactive) }} {{ __('inactive') }}
                     </p>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium">Today's Attendance</CardTitle>
+                    <CardTitle class="text-sm font-medium">{{ __("Today's Attendance") }}</CardTitle>
                     <Calendar class="h-4 w-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
                     <div class="text-2xl font-bold text-blue-600">{{ formatNumber(metrics.todayPresent) }}</div>
                     <p class="text-xs text-muted-foreground">
-                        {{ formatPercent(metrics.attendanceRate) }} attendance rate
+                        {{ formatPercent(metrics.attendanceRate) }} {{ __('attendance rate') }}
                     </p>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium">Employee Types</CardTitle>
+                    <CardTitle class="text-sm font-medium">{{ __('Employee Types') }}</CardTitle>
                     <Building2 class="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                     <div class="text-2xl font-bold">{{ formatNumber(metrics.totalTypes) }}</div>
-                    <p class="text-xs text-muted-foreground">Different job roles</p>
+                    <p class="text-xs text-muted-foreground">{{ __('Different job roles') }}</p>
                 </CardContent>
             </Card>
         </div>
@@ -253,9 +254,9 @@ const formatStatus = (status: string | boolean): string => {
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2">
                         <Calendar class="h-5 w-5" />
-                        Attendance Trend (Last 7 Days)
+                        {{ __('Attendance Trend (Last 7 Days)') }}
                     </CardTitle>
-                    <CardDescription>Daily attendance overview</CardDescription>
+                    <CardDescription>{{ __('Daily attendance overview') }}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ChartContainer :config="attendanceChartConfig" class="h-[280px]">
@@ -277,11 +278,11 @@ const formatStatus = (status: string | boolean): string => {
                     <div class="flex justify-center gap-4 mt-4">
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded bg-chart-2"></div>
-                            <span class="text-sm">Present</span>
+                            <span class="text-sm">{{ __('Present') }}</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded bg-chart-4"></div>
-                            <span class="text-sm">Absent</span>
+                            <span class="text-sm">{{ __('Absent') }}</span>
                         </div>
                     </div>
                 </CardContent>
@@ -292,9 +293,9 @@ const formatStatus = (status: string | boolean): string => {
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2">
                         <TrendingUp class="h-5 w-5" />
-                        Employee Growth (Last 6 Months)
+                        {{ __('Employee Growth (Last 6 Months)') }}
                     </CardTitle>
-                    <CardDescription>New employees over time</CardDescription>
+                    <CardDescription>{{ __('New employees over time') }}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ChartContainer :config="growthChartConfig" class="h-[280px]">
@@ -329,12 +330,12 @@ const formatStatus = (status: string | boolean): string => {
                     <div>
                         <CardTitle class="flex items-center gap-2">
                             <Users class="h-5 w-5 text-primary" />
-                            Recent Employees
+                            {{ __('Recent Employees') }}
                         </CardTitle>
-                        <CardDescription>Latest employees added to the system</CardDescription>
+                        <CardDescription>{{ __('Latest employees added to the system') }}</CardDescription>
                     </div>
                     <Link href="/dashboard/employees" class="text-sm text-primary hover:underline">
-                        View All
+                        {{ __('View All') }}
                     </Link>
                 </div>
             </CardHeader>
