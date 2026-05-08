@@ -2,10 +2,13 @@
 
 namespace Modules\Employee\Models;
 
+use App\Models\User;
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Employee\Enums\EmployeePlanEnum;
 
@@ -19,8 +22,6 @@ class EmployeePlan extends Model
 
     protected $fillable = [
         'uuid',
-        'employee_id',
-        'employee_availability_id',
         'title',
         'description',
         'start_date',
@@ -30,17 +31,18 @@ class EmployeePlan extends Model
         'priority',
         'location',
         'schedule_mode',
-        'participants',
         'is_recurring',
         'recurrence_type',
         'status',
+        'valid_for_months',
+        'created_by',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'participants' => 'array',
         'is_recurring' => 'boolean',
+        'valid_for_months' => 'integer',
     ];
 
     public const PRIORITIES = EmployeePlanEnum::PRIORITIES;
@@ -48,14 +50,35 @@ class EmployeePlan extends Model
     public const RECURRENCE_TYPES = EmployeePlanEnum::RECURRENCE_TYPES;
     public const STATUSES = EmployeePlanEnum::STATUSES;
 
-    public function employee(): BelongsTo
+    public function assignments(): HasMany
     {
-        return $this->belongsTo(Employee::class);
+        return $this->hasMany(EmployeePlanAssignment::class, 'employee_plan_id');
     }
 
-    public function employeeAvailability(): BelongsTo
+    public function employees(): BelongsToMany
     {
-        return $this->belongsTo(EmployeeAvailability::class);
+        return $this->belongsToMany(
+            Employee::class,
+            'employee_plan_assignments',
+            'employee_plan_id',
+            'employee_id',
+        )->whereNull('employee_plan_assignments.deleted_at')
+            ->withPivot([
+                'uuid',
+                'employee_availability_id',
+                'status',
+                'assigned_at',
+                'started_at',
+                'completed_at',
+                'expires_at',
+                'notes',
+            ])
+            ->withTimestamps();
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function getRouteKeyName(): string

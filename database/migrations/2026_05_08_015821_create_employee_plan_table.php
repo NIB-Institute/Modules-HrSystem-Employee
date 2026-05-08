@@ -11,8 +11,6 @@ return new class extends Migration
         Schema::create('employee_plan', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
-            $table->unsignedBigInteger('employee_availability_id')->nullable()->index();
 
             $table->string('title');
             $table->text('description')->nullable();
@@ -25,15 +23,19 @@ return new class extends Migration
             $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
             $table->string('location')->nullable();
             $table->enum('schedule_mode', ['single', 'recurring'])->default('single');
-            $table->json('participants')->nullable();
             $table->boolean('is_recurring')->default(false);
             $table->enum('recurrence_type', ['daily', 'weekly', 'monthly', 'yearly'])->nullable();
             $table->enum('status', ['scheduled', 'in_progress', 'completed', 'cancelled'])->default('scheduled');
 
+            $table->unsignedSmallInteger('valid_for_months')->nullable()
+                ->comment('How many months an assignment stays valid after completion. Null = no expiration.');
+
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+
             $table->softDeletes();
             $table->timestamps();
 
-            $table->index(['employee_id', 'status']);
+            $table->index(['status']);
             $table->index(['start_date', 'end_date']);
         });
     }

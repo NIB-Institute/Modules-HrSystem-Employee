@@ -5,6 +5,7 @@ namespace Modules\Employee\Http\Controllers\Dashboard\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Momentum\Modal\Modal;
@@ -33,17 +34,16 @@ class EmployeePlanController extends Controller
     public function index(Request $request): Response
     {
         $perPage = (int) $request->input('per_page', 10);
-        $filters = $request->only(['search', 'employee_id', 'status', 'priority', 'date_from', 'date_to']);
+        $filters = $request->only(['search', 'status', 'priority', 'date_from', 'date_to']);
 
         $data = $this->getIndexDataAction->execute($perPage, $filters);
 
         return Inertia::render('employee::Dashboard/V1/EmployeePlan/Index', $data);
     }
 
-    public function create(Request $request): Modal
+    public function create(): Modal
     {
-        $employeeId = $request->input('employee_id');
-        $data = $this->getCreateDataAction->execute($employeeId ? (int) $employeeId : null);
+        $data = $this->getCreateDataAction->execute();
 
         return Inertia::modal('employee::Dashboard/V1/EmployeePlan/Create', $data)
             ->baseRoute('employee.employee-plans.index');
@@ -51,11 +51,14 @@ class EmployeePlanController extends Controller
 
     public function store(StoreEmployeePlanRequest $request): RedirectResponse
     {
-        $this->createAction->execute($request->validated());
+        $payload = $request->validated();
+        $payload['created_by'] = Auth::id();
+
+        $this->createAction->execute($payload);
 
         return redirect()
             ->route('employee.employee-plans.index')
-            ->with('success', 'Employee plan created successfully.');
+            ->with('success', 'Plan created successfully.');
     }
 
     public function edit(EmployeePlan $employeePlan): Modal
@@ -72,12 +75,12 @@ class EmployeePlanController extends Controller
 
         return redirect()
             ->route('employee.employee-plans.index')
-            ->with('success', 'Employee plan updated successfully.');
+            ->with('success', 'Plan updated successfully.');
     }
 
     public function confirmDelete(EmployeePlan $employeePlan): Modal
     {
-        $employeePlan->load('employee');
+        $employeePlan->loadCount('assignments');
 
         return Inertia::modal('employee::Dashboard/V1/EmployeePlan/Delete', [
             'plan' => (new EmployeePlanResource($employeePlan))->resolve(),
@@ -90,6 +93,6 @@ class EmployeePlanController extends Controller
 
         return redirect()
             ->route('employee.employee-plans.index')
-            ->with('success', 'Employee plan deleted successfully.');
+            ->with('success', 'Plan deleted successfully.');
     }
 }

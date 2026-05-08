@@ -174,6 +174,14 @@ enum PermissionEnum: string
     case EMPLOYEE_AVAILABILITIES_RESTORE = 'employee_availabilities.restore';
     case EMPLOYEE_AVAILABILITIES_FORCE_DELETE = 'employee_availabilities.force_delete';
 
+    // ----- employee_plan_assignments -----
+    case EMPLOYEE_PLAN_ASSIGNMENTS_VIEW = 'employee_plan_assignments.view';
+    case EMPLOYEE_PLAN_ASSIGNMENTS_VIEW_ANY = 'employee_plan_assignments.view_any';
+    case EMPLOYEE_PLAN_ASSIGNMENTS_CREATE = 'employee_plan_assignments.create';
+    case EMPLOYEE_PLAN_ASSIGNMENTS_UPDATE = 'employee_plan_assignments.update';
+    case EMPLOYEE_PLAN_ASSIGNMENTS_DELETE = 'employee_plan_assignments.delete';
+    case EMPLOYEE_PLAN_ASSIGNMENTS_BULK_ASSIGN = 'employee_plan_assignments.bulk_assign';
+
     /**
      * Plain string values for every case. Used by the seeder.
      *

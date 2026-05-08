@@ -10,6 +10,7 @@ use Modules\Employee\Http\Controllers\Dashboard\V1\LocationController;
 // use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeExperienceController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\PermissionRequestController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeePlanController;
+use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeePlanAssignmentController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeAvailabilityController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeTrashController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeTypeTrashController;
@@ -182,6 +183,17 @@ Route::middleware(['auth', 'verified', 'auto.permission'])->prefix('dashboard')-
     Route::patch('employee-plans/{employeePlan}', [EmployeePlanController::class, 'update']);
     Route::get('employee-plans/{employeePlan}/delete', [EmployeePlanController::class, 'confirmDelete'])->name('employee-plans.confirm-delete');
     Route::delete('employee-plans/{employeePlan}', [EmployeePlanController::class, 'destroy'])->name('employee-plans.destroy');
+
+    // Employee Plan Assignments CRUD
+    Route::get('employee-plan-assignments/create', [EmployeePlanAssignmentController::class, 'create'])->name('employee-plan-assignments.create');
+    Route::post('employee-plan-assignments', [EmployeePlanAssignmentController::class, 'store'])->name('employee-plan-assignments.store');
+    Route::post('employee-plan-assignments/bulk-assign', [EmployeePlanAssignmentController::class, 'bulkAssign'])->name('employee-plan-assignments.bulk-assign');
+    Route::get('employee-plan-assignments', [EmployeePlanAssignmentController::class, 'index'])->name('employee-plan-assignments.index');
+    Route::get('employee-plan-assignments/{employeePlanAssignment}/edit', [EmployeePlanAssignmentController::class, 'edit'])->name('employee-plan-assignments.edit');
+    Route::put('employee-plan-assignments/{employeePlanAssignment}', [EmployeePlanAssignmentController::class, 'update'])->name('employee-plan-assignments.update');
+    Route::patch('employee-plan-assignments/{employeePlanAssignment}', [EmployeePlanAssignmentController::class, 'update']);
+    Route::get('employee-plan-assignments/{employeePlanAssignment}/delete', [EmployeePlanAssignmentController::class, 'confirmDelete'])->name('employee-plan-assignments.confirm-delete');
+    Route::delete('employee-plan-assignments/{employeePlanAssignment}', [EmployeePlanAssignmentController::class, 'destroy'])->name('employee-plan-assignments.destroy');
 
     // Employee Availabilities CRUD
     Route::get('employee-availabilities/create', [EmployeeAvailabilityController::class, 'create'])->name('employee-availabilities.create');

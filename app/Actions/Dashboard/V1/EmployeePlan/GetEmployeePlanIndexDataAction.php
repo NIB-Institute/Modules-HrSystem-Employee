@@ -10,23 +10,15 @@ class GetEmployeePlanIndexDataAction
 {
     public function execute(int $perPage = 10, array $filters = []): array
     {
-        $query = EmployeePlan::query()->with('employee');
+        $query = EmployeePlan::query()->withCount('assignments');
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhereHas('employee', function ($eq) use ($search) {
-                        $eq->where('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
-                            ->orWhere('employee_code', 'like', "%{$search}%");
-                    });
+                    ->orWhere('location', 'like', "%{$search}%");
             });
-        }
-
-        if (!empty($filters['employee_id'])) {
-            $query->where('employee_id', $filters['employee_id']);
         }
 
         if (!empty($filters['status']) && $filters['status'] !== 'all') {

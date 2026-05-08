@@ -39,9 +39,9 @@ class EmployeeAvailability extends Model
         return $this->belongsTo(Employee::class);
     }
 
-    public function plans(): HasMany
+    public function assignments(): HasMany
     {
-        return $this->hasMany(EmployeePlan::class);
+        return $this->hasMany(EmployeePlanAssignment::class, 'employee_availability_id');
     }
 
     public function getRouteKeyName(): string

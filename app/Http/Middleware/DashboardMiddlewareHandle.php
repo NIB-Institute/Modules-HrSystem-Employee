@@ -53,6 +53,17 @@ class DashboardMiddlewareHandle
         MenuService::addSubmenuItem(
             'primary',
             'employees',
+            __('Plan Assignments'),
+            route('employee.employee-plan-assignments.index'),
+            67,
+            PermissionEnum::EMPLOYEE_PLAN_ASSIGNMENTS_VIEW_ANY->value,
+            'employee.employee-plan-assignments.*',
+            'UsersRound',
+        );
+
+        MenuService::addSubmenuItem(
+            'primary',
+            'employees',
             __('Availability'),
             route('employee.employee-availabilities.index'),
             66,

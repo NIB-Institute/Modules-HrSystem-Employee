@@ -15,8 +15,6 @@ class EmployeePlanResource extends JsonResource
         return [
             'id' => $this->id,
             'uuid' => $this->uuid,
-            'employee_id' => $this->employee_id,
-            'employee_availability_id' => $this->employee_availability_id,
             'title' => $this->title,
             'description' => $this->description,
             'start_date' => $this->start_date?->format('Y-m-d'),
@@ -26,18 +24,19 @@ class EmployeePlanResource extends JsonResource
             'priority' => $this->priority,
             'location' => $this->location,
             'schedule_mode' => $this->schedule_mode,
-            'participants' => $this->participants,
             'is_recurring' => (bool) $this->is_recurring,
             'recurrence_type' => $this->recurrence_type,
             'status' => $this->status,
-            'employee' => $this->whenLoaded('employee', fn () => [
-                'id' => $this->employee->id,
-                'uuid' => $this->employee->uuid,
-                'full_name' => trim("{$this->employee->first_name} {$this->employee->last_name}"),
-                'first_name' => $this->employee->first_name,
-                'last_name' => $this->employee->last_name,
-                'employee_code' => $this->employee->employee_code,
-                'avatar_url' => $this->employee->avatar_url ?? null,
+            'valid_for_months' => $this->valid_for_months,
+            'created_by' => $this->created_by,
+
+            // assignment_count is loaded via withCount('assignments')
+            'assignees_count' => (int) ($this->assignments_count ?? $this->assignments()->count()),
+
+            'creator' => $this->whenLoaded('creator', fn () => [
+                'id' => $this->creator->id,
+                'name' => $this->creator->name ?? null,
+                'email' => $this->creator->email ?? null,
             ]),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
