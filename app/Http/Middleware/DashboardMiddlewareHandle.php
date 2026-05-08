@@ -42,6 +42,17 @@ class DashboardMiddlewareHandle
         MenuService::addSubmenuItem(
             'primary',
             'employees',
+            __('Employee Plans'),
+            route('employee.employee-plans.index'),
+            65,
+            PermissionEnum::EMPLOYEE_PLANS_VIEW_ANY->value,
+            'employee.employee-plans.*',
+            'NotebookPen',
+        );
+
+        MenuService::addSubmenuItem(
+            'primary',
+            'employees',
             __('Employee Types'),
             route('employee.employee-types.index'),
             20,

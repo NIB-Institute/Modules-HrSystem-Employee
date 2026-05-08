@@ -1,0 +1,269 @@
+<script setup lang="ts">
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { useTranslation } from '@/composables/useTranslation';
+import TiptapEditor from '@/components/TiptapEditor.vue';
+
+export interface EmployeeOption {
+    id: number;
+    full_name: string;
+    employee_code: string;
+}
+
+export interface EmployeePlanFormShape {
+    employee_id: number | null;
+    title: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    start_time: string;
+    end_time: string;
+    priority: string;
+    location: string;
+    schedule_mode: string;
+    is_recurring: boolean;
+    recurrence_type: string;
+    status: string;
+    errors: Record<string, string>;
+}
+
+interface Props {
+    form: EmployeePlanFormShape;
+    mode: 'create' | 'edit';
+    employees: EmployeeOption[];
+    priorities: string[];
+    scheduleModes: string[];
+    recurrenceTypes: string[];
+}
+
+const props = defineProps<Props>();
+
+const { __ } = useTranslation();
+</script>
+
+<template>
+    <div class="space-y-4">
+        <!-- Employee -->
+        <div class="space-y-2">
+            <Label for="employee_id">
+                {{ __('Employee') }} <span class="text-destructive">*</span>
+            </Label>
+            <Select
+                :model-value="props.form.employee_id?.toString() || ''"
+                @update:model-value="(v) => (props.form.employee_id = v ? Number(v) : null)"
+            >
+                <SelectTrigger :class="{ 'border-destructive': props.form.errors.employee_id }">
+                    <SelectValue :placeholder="__('Select Employee')" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem
+                        v-for="employee in props.employees"
+                        :key="employee.id"
+                        :value="employee.id.toString()"
+                    >
+                        {{ employee.full_name }} ({{ employee.employee_code }})
+                    </SelectItem>
+                </SelectContent>
+            </Select>
+            <p v-if="props.form.errors.employee_id" class="text-xs text-destructive">
+                {{ props.form.errors.employee_id }}
+            </p>
+        </div>
+
+        <!-- Title -->
+        <div class="space-y-2">
+            <Label for="title">
+                {{ __('Title') }} <span class="text-destructive">*</span>
+            </Label>
+            <Input
+                id="title"
+                v-model="props.form.title"
+                :placeholder="__('Plan title')"
+                :class="{ 'border-destructive': props.form.errors.title }"
+            />
+            <p v-if="props.form.errors.title" class="text-xs text-destructive">
+                {{ props.form.errors.title }}
+            </p>
+        </div>
+
+        <!-- Date range -->
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div class="space-y-2">
+                <Label for="start_date">
+                    {{ __('Start Date') }} <span class="text-destructive">*</span>
+                </Label>
+                <Input
+                    id="start_date"
+                    type="date"
+                    v-model="props.form.start_date"
+                    :class="{ 'border-destructive': props.form.errors.start_date }"
+                />
+                <p v-if="props.form.errors.start_date" class="text-xs text-destructive">
+                    {{ props.form.errors.start_date }}
+                </p>
+            </div>
+            <div class="space-y-2">
+                <Label for="end_date">
+                    {{ __('End Date') }} <span class="text-destructive">*</span>
+                </Label>
+                <Input
+                    id="end_date"
+                    type="date"
+                    v-model="props.form.end_date"
+                    :class="{ 'border-destructive': props.form.errors.end_date }"
+                />
+                <p v-if="props.form.errors.end_date" class="text-xs text-destructive">
+                    {{ props.form.errors.end_date }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Time range -->
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div class="space-y-2">
+                <Label for="start_time">{{ __('Start Time') }}</Label>
+                <Input
+                    id="start_time"
+                    type="time"
+                    v-model="props.form.start_time"
+                    :class="{ 'border-destructive': props.form.errors.start_time }"
+                />
+                <p v-if="props.form.errors.start_time" class="text-xs text-destructive">
+                    {{ props.form.errors.start_time }}
+                </p>
+            </div>
+            <div class="space-y-2">
+                <Label for="end_time">{{ __('End Time') }}</Label>
+                <Input
+                    id="end_time"
+                    type="time"
+                    v-model="props.form.end_time"
+                    :class="{ 'border-destructive': props.form.errors.end_time }"
+                />
+                <p v-if="props.form.errors.end_time" class="text-xs text-destructive">
+                    {{ props.form.errors.end_time }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Priority + Schedule mode -->
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div class="space-y-2">
+                <Label for="priority">
+                    {{ __('Priority') }} <span class="text-destructive">*</span>
+                </Label>
+                <Select v-model="props.form.priority">
+                    <SelectTrigger :class="{ 'border-destructive': props.form.errors.priority }">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="p in props.priorities"
+                            :key="p"
+                            :value="p"
+                        >
+                            {{ __(p) }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+                <p v-if="props.form.errors.priority" class="text-xs text-destructive">
+                    {{ props.form.errors.priority }}
+                </p>
+            </div>
+            <div class="space-y-2">
+                <Label for="schedule_mode">
+                    {{ __('Schedule Mode') }} <span class="text-destructive">*</span>
+                </Label>
+                <Select v-model="props.form.schedule_mode">
+                    <SelectTrigger :class="{ 'border-destructive': props.form.errors.schedule_mode }">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="m in props.scheduleModes"
+                            :key="m"
+                            :value="m"
+                        >
+                            {{ __(m) }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+                <p v-if="props.form.errors.schedule_mode" class="text-xs text-destructive">
+                    {{ props.form.errors.schedule_mode }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Location -->
+        <div class="space-y-2">
+            <Label for="location">{{ __('Location') }}</Label>
+            <Input
+                id="location"
+                v-model="props.form.location"
+                :placeholder="__('Optional location')"
+                :class="{ 'border-destructive': props.form.errors.location }"
+            />
+            <p v-if="props.form.errors.location" class="text-xs text-destructive">
+                {{ props.form.errors.location }}
+            </p>
+        </div>
+
+        <!-- Recurring -->
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div class="flex items-center gap-2 pt-6">
+                <input
+                    id="is_recurring"
+                    type="checkbox"
+                    v-model="props.form.is_recurring"
+                    class="h-4 w-4"
+                />
+                <Label for="is_recurring">{{ __('Recurring') }}</Label>
+            </div>
+            <div v-if="props.form.is_recurring" class="space-y-2">
+                <Label for="recurrence_type">
+                    {{ __('Recurrence') }} <span class="text-destructive">*</span>
+                </Label>
+                <Select v-model="props.form.recurrence_type">
+                    <SelectTrigger :class="{ 'border-destructive': props.form.errors.recurrence_type }">
+                        <SelectValue :placeholder="__('Select recurrence')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="r in props.recurrenceTypes"
+                            :key="r"
+                            :value="r"
+                        >
+                            {{ __(r) }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+                <p v-if="props.form.errors.recurrence_type" class="text-xs text-destructive">
+                    {{ props.form.errors.recurrence_type }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="space-y-2">
+            <Label for="description">{{ __('Description') }}</Label>
+            <TiptapEditor
+                id="description"
+                v-model="props.form.description"
+                :placeholder="__('Optional details about this plan...')"
+                rows="3"
+                :class="{ 'border-destructive': props.form.errors.description }"
+            />
+            <p v-if="props.form.errors.description" class="text-xs text-destructive">
+                {{ props.form.errors.description }}
+            </p>
+        </div>
+    </div>
+</template>
