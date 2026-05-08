@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/select';
 import { useTranslation } from '@/composables/useTranslation';
 import { computed } from 'vue';
+import TiptapEditor from '@/components/TiptapEditor.vue';
 
 export interface PlanOption {
     id: number;
@@ -177,7 +178,7 @@ const dayLabel = (d: string) => d.charAt(0).toUpperCase() + d.slice(1);
         <!-- Notes -->
         <div class="space-y-2">
             <Label for="notes">{{ __('Notes') }}</Label>
-            <Textarea
+            <TiptapEditor
                 id="notes"
                 v-model="props.form.notes"
                 :placeholder="__('Optional notes about this assignment...')"
