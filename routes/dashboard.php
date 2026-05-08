@@ -10,6 +10,7 @@ use Modules\Employee\Http\Controllers\Dashboard\V1\LocationController;
 // use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeExperienceController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\PermissionRequestController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeePlanController;
+use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeAvailabilityController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeTrashController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeTypeTrashController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\AttendanceTrashController;
@@ -181,6 +182,16 @@ Route::middleware(['auth', 'verified', 'auto.permission'])->prefix('dashboard')-
     Route::patch('employee-plans/{employeePlan}', [EmployeePlanController::class, 'update']);
     Route::get('employee-plans/{employeePlan}/delete', [EmployeePlanController::class, 'confirmDelete'])->name('employee-plans.confirm-delete');
     Route::delete('employee-plans/{employeePlan}', [EmployeePlanController::class, 'destroy'])->name('employee-plans.destroy');
+
+    // Employee Availabilities CRUD
+    Route::get('employee-availabilities/create', [EmployeeAvailabilityController::class, 'create'])->name('employee-availabilities.create');
+    Route::post('employee-availabilities', [EmployeeAvailabilityController::class, 'store'])->name('employee-availabilities.store');
+    Route::get('employee-availabilities', [EmployeeAvailabilityController::class, 'index'])->name('employee-availabilities.index');
+    Route::get('employee-availabilities/{employeeAvailability}/edit', [EmployeeAvailabilityController::class, 'edit'])->name('employee-availabilities.edit');
+    Route::put('employee-availabilities/{employeeAvailability}', [EmployeeAvailabilityController::class, 'update'])->name('employee-availabilities.update');
+    Route::patch('employee-availabilities/{employeeAvailability}', [EmployeeAvailabilityController::class, 'update']);
+    Route::get('employee-availabilities/{employeeAvailability}/delete', [EmployeeAvailabilityController::class, 'confirmDelete'])->name('employee-availabilities.confirm-delete');
+    Route::delete('employee-availabilities/{employeeAvailability}', [EmployeeAvailabilityController::class, 'destroy'])->name('employee-availabilities.destroy');
 
     // QR Code Generation
     Route::get('employees/{employee}/qr-code', [AttendanceController::class, 'generateEmployeeQr'])->name('employees.qr-code');

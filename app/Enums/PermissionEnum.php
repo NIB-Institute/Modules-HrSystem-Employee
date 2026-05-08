@@ -165,6 +165,15 @@ enum PermissionEnum: string
     case EMPLOYEE_PLANS_RESTORE = 'employee_plans.restore';
     case EMPLOYEE_PLANS_FORCE_DELETE = 'employee_plans.force_delete';
 
+    // ----- employee_availabilities -----
+    case EMPLOYEE_AVAILABILITIES_VIEW = 'employee_availabilities.view';
+    case EMPLOYEE_AVAILABILITIES_VIEW_ANY = 'employee_availabilities.view_any';
+    case EMPLOYEE_AVAILABILITIES_CREATE = 'employee_availabilities.create';
+    case EMPLOYEE_AVAILABILITIES_UPDATE = 'employee_availabilities.update';
+    case EMPLOYEE_AVAILABILITIES_DELETE = 'employee_availabilities.delete';
+    case EMPLOYEE_AVAILABILITIES_RESTORE = 'employee_availabilities.restore';
+    case EMPLOYEE_AVAILABILITIES_FORCE_DELETE = 'employee_availabilities.force_delete';
+
     /**
      * Plain string values for every case. Used by the seeder.
      *

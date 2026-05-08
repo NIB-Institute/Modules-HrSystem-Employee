@@ -53,6 +53,17 @@ class DashboardMiddlewareHandle
         MenuService::addSubmenuItem(
             'primary',
             'employees',
+            __('Availability'),
+            route('employee.employee-availabilities.index'),
+            66,
+            PermissionEnum::EMPLOYEE_AVAILABILITIES_VIEW_ANY->value,
+            'employee.employee-availabilities.*',
+            'CalendarRange',
+        );
+
+        MenuService::addSubmenuItem(
+            'primary',
+            'employees',
             __('Employee Types'),
             route('employee.employee-types.index'),
             20,
