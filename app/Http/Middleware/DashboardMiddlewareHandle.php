@@ -42,39 +42,6 @@ class DashboardMiddlewareHandle
         MenuService::addSubmenuItem(
             'primary',
             'employees',
-            __('Employee Plans'),
-            route('employee.employee-plans.index'),
-            65,
-            PermissionEnum::EMPLOYEE_PLANS_VIEW_ANY->value,
-            'employee.employee-plans.*',
-            'NotebookPen',
-        );
-
-        MenuService::addSubmenuItem(
-            'primary',
-            'employees',
-            __('Plan Assignments'),
-            route('employee.employee-plan-assignments.index'),
-            67,
-            PermissionEnum::EMPLOYEE_PLAN_ASSIGNMENTS_VIEW_ANY->value,
-            'employee.employee-plan-assignments.*',
-            'UsersRound',
-        );
-
-        MenuService::addSubmenuItem(
-            'primary',
-            'employees',
-            __('Availability'),
-            route('employee.employee-availabilities.index'),
-            66,
-            PermissionEnum::EMPLOYEE_AVAILABILITIES_VIEW_ANY->value,
-            'employee.employee-availabilities.*',
-            'CalendarRange',
-        );
-
-        MenuService::addSubmenuItem(
-            'primary',
-            'employees',
             __('Employee Types'),
             route('employee.employee-types.index'),
             20,
@@ -86,9 +53,53 @@ class DashboardMiddlewareHandle
         MenuService::addSubmenuItem(
             'primary',
             'employees',
+            __('Employee Plans'),
+            route('employee.employee-plans.index'),
+            30,
+            PermissionEnum::EMPLOYEE_PLANS_VIEW_ANY->value,
+            'employee.employee-plans.*',
+            'NotebookPen',
+        );
+
+        MenuService::addSubmenuItem(
+            'primary',
+            'employees',
+            __('Plan Assignments'),
+            route('employee.employee-plan-assignments.index'),
+            40,
+            PermissionEnum::EMPLOYEE_PLAN_ASSIGNMENTS_VIEW_ANY->value,
+            'employee.employee-plan-assignments.*',
+            'UsersRound',
+        );
+
+        MenuService::addSubmenuItem(
+            'primary',
+            'employees',
+            __('Availability'),
+            route('employee.employee-availabilities.index'),
+            50,
+            PermissionEnum::EMPLOYEE_AVAILABILITIES_VIEW_ANY->value,
+            'employee.employee-availabilities.*',
+            'CalendarRange',
+        );
+
+        MenuService::addSubmenuItem(
+            'primary',
+            'employees',
+            __('Self Service'),
+            route('employee.attendances.self-service'),
+            60,
+            null,
+            'employee.attendances.self-service',
+            'LogIn',
+        );
+
+        MenuService::addSubmenuItem(
+            'primary',
+            'employees',
             __('Attendance'),
             route('employee.attendances.index'),
-            30,
+            70,
             PermissionEnum::ATTENDANCES_VIEW_ANY->value,
             'employee.attendances.*',
             'ClipboardCheck',
@@ -99,7 +110,7 @@ class DashboardMiddlewareHandle
             'employees',
             __('QR Scanner'),
             route('employee.attendances.scanner'),
-            40,
+            80,
             PermissionEnum::ATTENDANCES_SCAN_QR->value,
             'employee.attendances.scanner',
             'QrCode',
@@ -110,7 +121,7 @@ class DashboardMiddlewareHandle
             'employees',
             __('Scan Locations'),
             route('employee.locations.index'),
-            50,
+            90,
             PermissionEnum::LOCATIONS_VIEW_ANY->value,
             'employee.locations.*',
             'MapPin',
@@ -121,21 +132,10 @@ class DashboardMiddlewareHandle
             'employees',
             __('Permission Requests'),
             route('employee.permission-requests.index'),
-            60,
+            100,
             PermissionEnum::PERMISSION_REQUESTS_VIEW_ANY->value,
             'employee.permission-requests.*',
             'FileText',
-        );
-
-        MenuService::addSubmenuItem(
-            'primary',
-            'employees',
-            __('Self Service'),
-            route('employee.attendances.self-service'),
-            70,
-            null,
-            'employee.attendances.self-service',
-            'LogIn',
         );
 
         return $next($request);
