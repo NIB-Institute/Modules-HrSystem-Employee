@@ -7,14 +7,7 @@ import { useModal } from 'momentum-modal';
 import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 
-interface EmployeeOption {
-    id: number;
-    full_name: string;
-    employee_code: string;
-}
-
 interface Props {
-    employees: EmployeeOption[];
     priorities: string[];
     scheduleModes: string[];
     recurrenceTypes: string[];
@@ -37,7 +30,6 @@ const isOpen = computed({
 });
 
 const form = useForm({
-    employee_id: null as number | null,
     title: '',
     description: '',
     start_date: '',
@@ -50,10 +42,10 @@ const form = useForm({
     is_recurring: false,
     recurrence_type: '',
     status: 'scheduled',
+    valid_for_months: null as number | null,
 });
 
 const isFormInvalid = computed(() =>
-    !form.employee_id ||
     !form.title.trim() ||
     !form.start_date ||
     !form.end_date ||
@@ -65,7 +57,7 @@ const handleSubmit = () => {
     form.post('/dashboard/employee-plans', {
         preserveScroll: true,
         onSuccess: () => {
-            toast.success(__('Employee plan created successfully.'));
+            toast.success(__('Plan created successfully.'));
             setTimeout(() => {
                 close();
                 redirect();
@@ -83,8 +75,8 @@ const handleCancel = () => {
 <template>
     <ModalForm
         v-model:open="isOpen"
-        :title="__('New Employee Plan')"
-        :description="__('Schedule a plan or task for an employee')"
+        :title="__('New Plan')"
+        :description="__('Create a plan template — assign employees in the next step')"
         mode="create"
         size="xl"
         :submit-text="__('Create Plan')"
@@ -96,7 +88,6 @@ const handleCancel = () => {
         <EmployeePlanForm
             :form="form"
             mode="create"
-            :employees="props.employees"
             :priorities="props.priorities"
             :schedule-modes="props.scheduleModes"
             :recurrence-types="props.recurrenceTypes"

@@ -2,38 +2,33 @@
 
 namespace Modules\Employee\Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Modules\Employee\Enums\EmployeePlanEnum;
-use Modules\Employee\Models\Employee;
 use Modules\Employee\Models\EmployeePlan;
 
 class EmployeePlanSeeder extends Seeder
 {
     public function run(): void
     {
-        $employees = Employee::where('status', true)->take(10)->get();
+        $createdBy = User::query()->first()?->id;
 
-        if ($employees->isEmpty()) {
-            $this->command->warn('No employees found. Please seed employees first.');
-            return;
-        }
-
-        $titleTemplates = [
-            'Onboarding Plan for :name',
-            'Q1 Training Roadmap',
-            'Sales Enablement Workshop',
-            'Performance Review Cycle',
-            'Quarterly OKR Planning',
-            'Skills Development Sprint',
+        $titles = [
+            'Q1 Onboarding Workshop',
+            'Sales Enablement Program',
+            'Annual Compliance Training',
+            'Leadership Development Track',
             'Cross-Team Collaboration Day',
             'Health & Safety Drill',
             'Annual Company Retreat',
-            'Compliance Training Module',
+            'Customer Service Refresher',
+            'Cybersecurity Awareness 2026',
+            'Performance Review Cycle',
         ];
 
         $descriptionTemplates = [
-            'Structured plan covering key milestones, daily check-ins, and a final review.',
-            'Hands-on workshop with mentor pairing and end-of-week deliverables.',
+            'Structured program covering key milestones, mentor pairing, and a final review.',
+            'Hands-on workshop with daily check-ins and end-of-week deliverables.',
             'Self-paced learning track with weekly progress check-ins.',
             'Cross-functional initiative requiring participation from multiple teams.',
             null,
@@ -53,67 +48,44 @@ class EmployeePlanSeeder extends Seeder
         $recurrenceTypes = EmployeePlanEnum::RECURRENCE_TYPES;
         $statuses = EmployeePlanEnum::STATUSES;
 
-        $employeeIds = $employees->pluck('id')->all();
+        $validityOptions = [null, 12, 24, 36];
 
         $this->command->info('Creating employee plans...');
 
         $count = 0;
-        foreach ($employees as $employee) {
-            $numPlans = rand(2, 4);
+        foreach ($titles as $title) {
+            $startDate = now()->addDays(rand(-30, 30))->startOfDay();
+            $endDate = (clone $startDate)->addDays(rand(0, 14));
 
-            for ($i = 0; $i < $numPlans; $i++) {
-                $title = str_replace(
-                    ':name',
-                    trim("{$employee->first_name} {$employee->last_name}") ?: $employee->employee_code,
-                    $titleTemplates[array_rand($titleTemplates)],
-                );
+            $hasTimes = (bool) rand(0, 1);
+            $startTime = $hasTimes ? sprintf('%02d:%02d', rand(7, 12), [0, 15, 30, 45][rand(0, 3)]) : null;
+            $endTime = $hasTimes ? sprintf('%02d:%02d', rand(13, 18), [0, 15, 30, 45][rand(0, 3)]) : null;
 
-                $startDate = now()->addDays(rand(-30, 30))->startOfDay();
-                $endDate = (clone $startDate)->addDays(rand(0, 14));
+            $scheduleMode = $scheduleModes[array_rand($scheduleModes)];
+            $isRecurring = $scheduleMode === EmployeePlanEnum::SCHEDULE_MODE_RECURRING;
+            $recurrenceType = $isRecurring ? $recurrenceTypes[array_rand($recurrenceTypes)] : null;
 
-                $hasTimes = (bool) rand(0, 1);
-                $startTime = $hasTimes ? sprintf('%02d:%02d', rand(7, 12), [0, 15, 30, 45][rand(0, 3)]) : null;
-                $endTime = $hasTimes ? sprintf('%02d:%02d', rand(13, 18), [0, 15, 30, 45][rand(0, 3)]) : null;
+            EmployeePlan::create([
+                'title' => $title,
+                'description' => $descriptionTemplates[array_rand($descriptionTemplates)],
+                'start_date' => $startDate->format('Y-m-d'),
+                'end_date' => $endDate->format('Y-m-d'),
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'priority' => $priorities[array_rand($priorities)],
+                'location' => $locations[array_rand($locations)],
+                'schedule_mode' => $scheduleMode,
+                'is_recurring' => $isRecurring,
+                'recurrence_type' => $recurrenceType,
+                'status' => $statuses[array_rand($statuses)],
+                'valid_for_months' => $validityOptions[array_rand($validityOptions)],
+                'created_by' => $createdBy,
+            ]);
 
-                $scheduleMode = $scheduleModes[array_rand($scheduleModes)];
-                $isRecurring = $scheduleMode === EmployeePlanEnum::SCHEDULE_MODE_RECURRING;
-                $recurrenceType = $isRecurring
-                    ? $recurrenceTypes[array_rand($recurrenceTypes)]
-                    : null;
-
-                $participantCount = rand(0, 3);
-                $participants = $participantCount === 0
-                    ? null
-                    : collect($employeeIds)
-                        ->reject(fn ($id) => $id === $employee->id)
-                        ->shuffle()
-                        ->take($participantCount)
-                        ->values()
-                        ->all();
-
-                EmployeePlan::create([
-                    'employee_id' => $employee->id,
-                    'employee_availability_id' => null,
-                    'title' => $title,
-                    'description' => $descriptionTemplates[array_rand($descriptionTemplates)],
-                    'start_date' => $startDate->format('Y-m-d'),
-                    'end_date' => $endDate->format('Y-m-d'),
-                    'start_time' => $startTime,
-                    'end_time' => $endTime,
-                    'priority' => $priorities[array_rand($priorities)],
-                    'location' => $locations[array_rand($locations)],
-                    'schedule_mode' => $scheduleMode,
-                    'participants' => $participants,
-                    'is_recurring' => $isRecurring,
-                    'recurrence_type' => $recurrenceType,
-                    'status' => $statuses[array_rand($statuses)],
-                ]);
-
-                $count++;
-            }
+            $count++;
         }
 
-        $this->command->info("Created {$count} employee plans successfully!");
+        $this->command->info("Created {$count} plans successfully!");
 
         $stats = [
             'Total' => EmployeePlan::count(),

@@ -7,21 +7,19 @@ import { toast } from 'vue-sonner';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Calendar, FileText, Users } from 'lucide-vue-next';
+import { AlertTriangle, FileText, User } from 'lucide-vue-next';
 import { useTranslation } from '@/composables/useTranslation';
 
-interface PlanResource {
+interface AssignmentResource {
     uuid: string;
-    title: string;
-    start_date: string | null;
-    end_date: string | null;
-    priority: string;
     status: string;
-    assignees_count: number;
+    status_label: string;
+    plan?: { title: string };
+    employee?: { full_name: string; employee_code: string };
 }
 
 interface Props {
-    plan: PlanResource;
+    assignment: AssignmentResource;
 }
 
 const props = defineProps<Props>();
@@ -43,10 +41,10 @@ const confirmed = ref(false);
 const form = useForm({});
 
 const handleSubmit = () => {
-    form.delete(`/dashboard/employee-plans/${props.plan.uuid}`, {
+    form.delete(`/dashboard/employee-plan-assignments/${props.assignment.uuid}`, {
         preserveScroll: true,
         onSuccess: () => {
-            toast.success(__('Plan deleted successfully.'));
+            toast.success(__('Assignment removed successfully.'));
             setTimeout(() => {
                 close();
                 redirect();
@@ -64,11 +62,11 @@ const handleCancel = () => {
 <template>
     <ModalForm
         v-model:open="isOpen"
-        :title="__('Delete Plan')"
+        :title="__('Remove Assignment')"
         :description="__('This action cannot be undone')"
         mode="delete"
         size="md"
-        :submit-text="__('Delete Plan')"
+        :submit-text="__('Remove')"
         :loading="form.processing"
         :disabled="!confirmed"
         @submit="handleSubmit"
@@ -81,20 +79,17 @@ const handleCancel = () => {
                         <FileText class="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                        <p class="font-medium">{{ props.plan.title }}</p>
-                        <Badge variant="outline">{{ __(props.plan.priority) }}</Badge>
-                        <Badge class="ml-1">{{ __(props.plan.status) }}</Badge>
+                        <p class="font-medium">{{ props.assignment.plan?.title }}</p>
+                        <Badge>{{ props.assignment.status_label }}</Badge>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar class="h-4 w-4" />
-                    <span>{{ props.plan.start_date }} – {{ props.plan.end_date }}</span>
-                </div>
-
-                <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users class="h-4 w-4" />
-                    <span>{{ props.plan.assignees_count }} {{ __('assignees') }}</span>
+                <div v-if="props.assignment.employee" class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <User class="h-4 w-4" />
+                    <span>
+                        {{ props.assignment.employee.full_name }}
+                        ({{ props.assignment.employee.employee_code }})
+                    </span>
                 </div>
             </div>
 
@@ -102,10 +97,10 @@ const handleCancel = () => {
                 <AlertTriangle class="mt-0.5 h-5 w-5 text-destructive" />
                 <div class="space-y-1">
                     <p class="text-sm font-medium text-destructive">
-                        {{ __('You are about to delete this plan') }}
+                        {{ __('You are about to remove this assignment') }}
                     </p>
                     <p class="text-sm text-muted-foreground">
-                        {{ __('All assignments will also be soft-deleted. Both can be restored from trash.') }}
+                        {{ __('The plan and the employee remain — only the link is soft-deleted.') }}
                     </p>
                 </div>
             </div>
@@ -114,11 +109,8 @@ const handleCancel = () => {
                 <Checkbox id="confirmed" v-model="confirmed" />
                 <div class="space-y-1">
                     <Label for="confirmed" class="cursor-pointer font-medium">
-                        {{ __('I confirm this deletion') }}
+                        {{ __('I confirm this removal') }}
                     </Label>
-                    <p class="text-sm text-muted-foreground">
-                        {{ __('I understand this action removes the plan and its assignments.') }}
-                    </p>
                 </div>
             </div>
         </div>

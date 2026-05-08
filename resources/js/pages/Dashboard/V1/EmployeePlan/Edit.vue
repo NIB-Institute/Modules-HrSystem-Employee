@@ -7,16 +7,9 @@ import { useModal } from 'momentum-modal';
 import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 
-interface EmployeeOption {
-    id: number;
-    full_name: string;
-    employee_code: string;
-}
-
 interface PlanResource {
     id: number;
     uuid: string;
-    employee_id: number | null;
     title: string;
     description: string | null;
     start_date: string | null;
@@ -29,11 +22,11 @@ interface PlanResource {
     is_recurring: boolean;
     recurrence_type: string | null;
     status: string;
+    valid_for_months: number | null;
 }
 
 interface Props {
     plan: PlanResource;
-    employees: EmployeeOption[];
     priorities: string[];
     scheduleModes: string[];
     recurrenceTypes: string[];
@@ -56,7 +49,6 @@ const isOpen = computed({
 });
 
 const form = useForm({
-    employee_id: props.plan.employee_id,
     title: props.plan.title ?? '',
     description: props.plan.description ?? '',
     start_date: props.plan.start_date ?? '',
@@ -69,10 +61,10 @@ const form = useForm({
     is_recurring: props.plan.is_recurring,
     recurrence_type: props.plan.recurrence_type ?? '',
     status: props.plan.status,
+    valid_for_months: props.plan.valid_for_months,
 });
 
 const isFormInvalid = computed(() =>
-    !form.employee_id ||
     !form.title.trim() ||
     !form.start_date ||
     !form.end_date ||
@@ -84,7 +76,7 @@ const handleSubmit = () => {
     form.put(`/dashboard/employee-plans/${props.plan.uuid}`, {
         preserveScroll: true,
         onSuccess: () => {
-            toast.success(__('Employee plan updated successfully.'));
+            toast.success(__('Plan updated successfully.'));
             setTimeout(() => {
                 close();
                 redirect();
@@ -102,8 +94,8 @@ const handleCancel = () => {
 <template>
     <ModalForm
         v-model:open="isOpen"
-        :title="__('Edit Employee Plan')"
-        :description="__('Update plan details')"
+        :title="__('Edit Plan')"
+        :description="__('Update plan template details')"
         mode="edit"
         size="xl"
         :submit-text="__('Save Changes')"
@@ -115,7 +107,6 @@ const handleCancel = () => {
         <EmployeePlanForm
             :form="form"
             mode="edit"
-            :employees="props.employees"
             :priorities="props.priorities"
             :schedule-modes="props.scheduleModes"
             :recurrence-types="props.recurrenceTypes"

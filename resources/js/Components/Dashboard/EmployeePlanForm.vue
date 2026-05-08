@@ -10,16 +10,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useTranslation } from '@/composables/useTranslation';
-import TiptapEditor from '@/components/TiptapEditor.vue';
-
-export interface EmployeeOption {
-    id: number;
-    full_name: string;
-    employee_code: string;
-}
 
 export interface EmployeePlanFormShape {
-    employee_id: number | null;
     title: string;
     description: string;
     start_date: string;
@@ -32,13 +24,13 @@ export interface EmployeePlanFormShape {
     is_recurring: boolean;
     recurrence_type: string;
     status: string;
+    valid_for_months: number | null;
     errors: Record<string, string>;
 }
 
 interface Props {
     form: EmployeePlanFormShape;
     mode: 'create' | 'edit';
-    employees: EmployeeOption[];
     priorities: string[];
     scheduleModes: string[];
     recurrenceTypes: string[];
@@ -51,33 +43,6 @@ const { __ } = useTranslation();
 
 <template>
     <div class="space-y-4">
-        <!-- Employee -->
-        <div class="space-y-2">
-            <Label for="employee_id">
-                {{ __('Employee') }} <span class="text-destructive">*</span>
-            </Label>
-            <Select
-                :model-value="props.form.employee_id?.toString() || ''"
-                @update:model-value="(v) => (props.form.employee_id = v ? Number(v) : null)"
-            >
-                <SelectTrigger :class="{ 'border-destructive': props.form.errors.employee_id }">
-                    <SelectValue :placeholder="__('Select Employee')" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem
-                        v-for="employee in props.employees"
-                        :key="employee.id"
-                        :value="employee.id.toString()"
-                    >
-                        {{ employee.full_name }} ({{ employee.employee_code }})
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-            <p v-if="props.form.errors.employee_id" class="text-xs text-destructive">
-                {{ props.form.errors.employee_id }}
-            </p>
-        </div>
-
         <!-- Title -->
         <div class="space-y-2">
             <Label for="title">
@@ -130,24 +95,14 @@ const { __ } = useTranslation();
         <div class="grid gap-4 sm:grid-cols-2">
             <div class="space-y-2">
                 <Label for="start_time">{{ __('Start Time') }}</Label>
-                <Input
-                    id="start_time"
-                    type="time"
-                    v-model="props.form.start_time"
-                    :class="{ 'border-destructive': props.form.errors.start_time }"
-                />
+                <Input id="start_time" type="time" v-model="props.form.start_time" />
                 <p v-if="props.form.errors.start_time" class="text-xs text-destructive">
                     {{ props.form.errors.start_time }}
                 </p>
             </div>
             <div class="space-y-2">
                 <Label for="end_time">{{ __('End Time') }}</Label>
-                <Input
-                    id="end_time"
-                    type="time"
-                    v-model="props.form.end_time"
-                    :class="{ 'border-destructive': props.form.errors.end_time }"
-                />
+                <Input id="end_time" type="time" v-model="props.form.end_time" />
                 <p v-if="props.form.errors.end_time" class="text-xs text-destructive">
                     {{ props.form.errors.end_time }}
                 </p>
@@ -165,11 +120,7 @@ const { __ } = useTranslation();
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem
-                            v-for="p in props.priorities"
-                            :key="p"
-                            :value="p"
-                        >
+                        <SelectItem v-for="p in props.priorities" :key="p" :value="p">
                             {{ __(p) }}
                         </SelectItem>
                     </SelectContent>
@@ -187,11 +138,7 @@ const { __ } = useTranslation();
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem
-                            v-for="m in props.scheduleModes"
-                            :key="m"
-                            :value="m"
-                        >
+                        <SelectItem v-for="m in props.scheduleModes" :key="m" :value="m">
                             {{ __(m) }}
                         </SelectItem>
                     </SelectContent>
@@ -202,29 +149,40 @@ const { __ } = useTranslation();
             </div>
         </div>
 
-        <!-- Location -->
-        <div class="space-y-2">
-            <Label for="location">{{ __('Location') }}</Label>
-            <Input
-                id="location"
-                v-model="props.form.location"
-                :placeholder="__('Optional location')"
-                :class="{ 'border-destructive': props.form.errors.location }"
-            />
-            <p v-if="props.form.errors.location" class="text-xs text-destructive">
-                {{ props.form.errors.location }}
-            </p>
+        <!-- Location + Valid for -->
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div class="space-y-2">
+                <Label for="location">{{ __('Location') }}</Label>
+                <Input id="location" v-model="props.form.location" :placeholder="__('Optional location')" />
+                <p v-if="props.form.errors.location" class="text-xs text-destructive">
+                    {{ props.form.errors.location }}
+                </p>
+            </div>
+            <div class="space-y-2">
+                <Label for="valid_for_months">
+                    {{ __('Valid for (months)') }}
+                </Label>
+                <Input
+                    id="valid_for_months"
+                    type="number"
+                    min="1"
+                    max="120"
+                    v-model.number="props.form.valid_for_months"
+                    :placeholder="__('e.g. 24 — leave empty for no expiry')"
+                />
+                <p class="text-xs text-muted-foreground">
+                    {{ __('Each assignee\'s expiry = completed_at + this many months.') }}
+                </p>
+                <p v-if="props.form.errors.valid_for_months" class="text-xs text-destructive">
+                    {{ props.form.errors.valid_for_months }}
+                </p>
+            </div>
         </div>
 
         <!-- Recurring -->
         <div class="grid gap-4 sm:grid-cols-2">
             <div class="flex items-center gap-2 pt-6">
-                <input
-                    id="is_recurring"
-                    type="checkbox"
-                    v-model="props.form.is_recurring"
-                    class="h-4 w-4"
-                />
+                <input id="is_recurring" type="checkbox" v-model="props.form.is_recurring" class="h-4 w-4" />
                 <Label for="is_recurring">{{ __('Recurring') }}</Label>
             </div>
             <div v-if="props.form.is_recurring" class="space-y-2">
@@ -236,11 +194,7 @@ const { __ } = useTranslation();
                         <SelectValue :placeholder="__('Select recurrence')" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem
-                            v-for="r in props.recurrenceTypes"
-                            :key="r"
-                            :value="r"
-                        >
+                        <SelectItem v-for="r in props.recurrenceTypes" :key="r" :value="r">
                             {{ __(r) }}
                         </SelectItem>
                     </SelectContent>
@@ -254,12 +208,11 @@ const { __ } = useTranslation();
         <!-- Description -->
         <div class="space-y-2">
             <Label for="description">{{ __('Description') }}</Label>
-            <TiptapEditor
+            <Textarea
                 id="description"
                 v-model="props.form.description"
                 :placeholder="__('Optional details about this plan...')"
                 rows="3"
-                :class="{ 'border-destructive': props.form.errors.description }"
             />
             <p v-if="props.form.errors.description" class="text-xs text-destructive">
                 {{ props.form.errors.description }}

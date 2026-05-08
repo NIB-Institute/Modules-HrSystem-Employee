@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import {
-    Plus, Search, Pencil, Trash2,
+    Plus, Search, Pencil, Trash2, UserPlus,
     CalendarClock, CalendarDays, PlayCircle, CheckCircle,
 } from 'lucide-vue-next';
 import type { BreadcrumbItem } from '@/types';
@@ -32,11 +32,8 @@ interface PlanRow {
     priority: string;
     status: string;
     location: string | null;
-    employee?: {
-        id: number;
-        full_name: string;
-        employee_code: string;
-    } | null;
+    valid_for_months: number | null;
+    assignees_count: number;
 }
 
 interface Props {
@@ -75,21 +72,19 @@ const priorityFilter = ref(props.filters.priority || 'all');
 
 const columns: TableColumn<PlanRow>[] = [
     { key: 'title', label: __('Title') },
-    {
-        key: 'employee',
-        label: __('Employee'),
-        render: (item) => item.employee?.full_name || '-',
-    },
-    {
-        key: 'period',
-        label: __('Period'),
-        render: (item) => `${item.start_date ?? ''} - ${item.end_date ?? ''}`,
-    },
+    { key: 'period', label: __('Period') },
+    { key: 'assignees', label: __('Employees') },
     { key: 'priority', label: __('Priority') },
     { key: 'status', label: __('Status') },
+    { key: 'validity', label: __('Validity') },
 ];
 
 const actions: TableAction<PlanRow>[] = [
+    {
+        label: __('Assign Employees'),
+        icon: UserPlus,
+        onClick: (item) => router.visit(`/dashboard/employee-plan-assignments/create?employee_plan_id=${item.id}`),
+    },
     {
         label: __('Edit'),
         icon: Pencil,
@@ -146,27 +141,19 @@ const handleCreate = () => {
 
 const getStatusVariant = (status: string) => {
     switch (status) {
-        case 'completed':
-            return 'default';
-        case 'cancelled':
-            return 'destructive';
-        case 'in_progress':
-            return 'secondary';
-        default:
-            return 'outline';
+        case 'completed': return 'default';
+        case 'cancelled': return 'destructive';
+        case 'in_progress': return 'secondary';
+        default: return 'outline';
     }
 };
 
 const getPriorityVariant = (priority: string) => {
     switch (priority) {
-        case 'urgent':
-            return 'destructive';
-        case 'high':
-            return 'secondary';
-        case 'low':
-            return 'outline';
-        default:
-            return 'default';
+        case 'urgent': return 'destructive';
+        case 'high': return 'secondary';
+        case 'low': return 'outline';
+        default: return 'default';
     }
 };
 </script>
@@ -178,29 +165,10 @@ const getPriorityVariant = (priority: string) => {
         <div class="flex h-full flex-1 flex-col gap-6 p-6">
             <!-- Stats -->
             <div class="grid gap-4 md:grid-cols-4">
-                <StatsCard
-                    :title="__('Total Plans')"
-                    :value="props.stats.total"
-                    :icon="CalendarDays"
-                />
-                <StatsCard
-                    :title="__('Scheduled')"
-                    :value="props.stats.scheduled"
-                    :icon="CalendarClock"
-                    variant="info"
-                />
-                <StatsCard
-                    :title="__('In Progress')"
-                    :value="props.stats.in_progress"
-                    :icon="PlayCircle"
-                    variant="warning"
-                />
-                <StatsCard
-                    :title="__('Completed')"
-                    :value="props.stats.completed"
-                    :icon="CheckCircle"
-                    variant="success"
-                />
+                <StatsCard :title="__('Total Plans')" :value="props.stats.total" :icon="CalendarDays" />
+                <StatsCard :title="__('Scheduled')" :value="props.stats.scheduled" :icon="CalendarClock" variant="info" />
+                <StatsCard :title="__('In Progress')" :value="props.stats.in_progress" :icon="PlayCircle" variant="warning" />
+                <StatsCard :title="__('Completed')" :value="props.stats.completed" :icon="CheckCircle" variant="success" />
             </div>
 
             <!-- Header -->
@@ -209,7 +177,7 @@ const getPriorityVariant = (priority: string) => {
                     <div>
                         <h2 class="text-lg font-semibold">{{ __('Employee Plans') }}</h2>
                         <p class="text-sm text-muted-foreground">
-                            {{ __('Schedule and manage plans for your employees') }}
+                            {{ __('Plan templates — assign employees to a plan from the actions menu') }}
                         </p>
                     </div>
                     <Button @click="handleCreate">
@@ -235,13 +203,7 @@ const getPriorityVariant = (priority: string) => {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">{{ __('All Status') }}</SelectItem>
-                            <SelectItem
-                                v-for="s in props.statuses"
-                                :key="s"
-                                :value="s"
-                            >
-                                {{ __(s) }}
-                            </SelectItem>
+                            <SelectItem v-for="s in props.statuses" :key="s" :value="s">{{ __(s) }}</SelectItem>
                         </SelectContent>
                     </Select>
                     <Select v-model="priorityFilter">
@@ -250,13 +212,7 @@ const getPriorityVariant = (priority: string) => {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">{{ __('All Priorities') }}</SelectItem>
-                            <SelectItem
-                                v-for="p in props.priorities"
-                                :key="p"
-                                :value="p"
-                            >
-                                {{ __(p) }}
-                            </SelectItem>
+                            <SelectItem v-for="p in props.priorities" :key="p" :value="p">{{ __(p) }}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -274,23 +230,19 @@ const getPriorityVariant = (priority: string) => {
                     <template #cell-title="{ item }">
                         <div>
                             <p class="font-medium text-sm">{{ item.title }}</p>
-                            <p v-if="item.location" class="text-xs text-muted-foreground">
-                                {{ item.location }}
-                            </p>
+                            <p v-if="item.location" class="text-xs text-muted-foreground">{{ item.location }}</p>
                         </div>
-                    </template>
-                    <template #cell-employee="{ item }">
-                        <div v-if="item.employee">
-                            <p class="text-sm font-medium">{{ item.employee.full_name }}</p>
-                            <p class="text-xs text-muted-foreground">{{ item.employee.employee_code }}</p>
-                        </div>
-                        <span v-else class="text-muted-foreground">-</span>
                     </template>
                     <template #cell-period="{ item }">
                         <div class="text-sm">
                             <p>{{ item.start_date }}</p>
                             <p class="text-muted-foreground">to {{ item.end_date }}</p>
                         </div>
+                    </template>
+                    <template #cell-assignees="{ item }">
+                        <Badge variant="outline" class="font-mono">
+                            {{ item.assignees_count }} {{ __('employees') }}
+                        </Badge>
                     </template>
                     <template #cell-priority="{ item }">
                         <Badge :variant="getPriorityVariant(item.priority)">
@@ -301,6 +253,12 @@ const getPriorityVariant = (priority: string) => {
                         <Badge :variant="getStatusVariant(item.status)">
                             {{ __(item.status) }}
                         </Badge>
+                    </template>
+                    <template #cell-validity="{ item }">
+                        <span v-if="item.valid_for_months" class="text-sm">
+                            {{ item.valid_for_months }} {{ __('months') }}
+                        </span>
+                        <span v-else class="text-xs text-muted-foreground">{{ __('No expiry') }}</span>
                     </template>
                 </TableReusable>
             </div>
