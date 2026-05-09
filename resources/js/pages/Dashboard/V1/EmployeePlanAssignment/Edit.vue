@@ -17,7 +17,15 @@ interface AssignmentResource {
     started_at: string | null;
     completed_at: string | null;
     notes: string | null;
-    plan?: { uuid: string; title: string };
+    plan?: {
+        id: number;
+        uuid: string;
+        title: string;
+        start_date?: string | null;
+        end_date?: string | null;
+        start_time?: string | null;
+        end_time?: string | null;
+    };
     employee?: { full_name: string; employee_code: string };
 }
 
@@ -97,6 +105,7 @@ const handleCancel = () => {
         <EmployeePlanAssignmentForm
             :form="form"
             mode="edit"
+            :plan="props.assignment.plan"
             :availabilities="props.availabilities"
             :statuses="props.statuses"
         />

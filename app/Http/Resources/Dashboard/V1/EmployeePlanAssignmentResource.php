@@ -35,6 +35,12 @@ class EmployeePlanAssignmentResource extends JsonResource
                 'status' => $this->plan->status,
                 'start_date' => $this->plan->start_date?->format('Y-m-d'),
                 'end_date' => $this->plan->end_date?->format('Y-m-d'),
+                'start_time' => $this->plan->start_time
+                    ? substr((string) $this->plan->start_time, 0, 5)
+                    : null,
+                'end_time' => $this->plan->end_time
+                    ? substr((string) $this->plan->end_time, 0, 5)
+                    : null,
             ]),
             'employee' => $this->whenLoaded('employee', fn () => [
                 'id' => $this->employee->id,
@@ -55,6 +61,7 @@ class EmployeePlanAssignmentResource extends JsonResource
                 'end_time' => $this->availability->end_time
                     ? substr((string) $this->availability->end_time, 0, 5)
                     : null,
+                'is_active' => (bool) $this->availability->is_active,
             ] : null),
 
             'created_at' => $this->created_at?->toIso8601String(),
