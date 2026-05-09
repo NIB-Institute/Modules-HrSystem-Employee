@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { SearchableSelect } from '@/components/shared';
+import type { SearchableSelectOption } from '@/components/shared';
 import { useTranslation } from '@/composables/useTranslation';
 import { computed } from 'vue';
 import TiptapEditor from '@/components/TiptapEditor.vue';
@@ -59,120 +53,144 @@ const props = defineProps<Props>();
 
 const { __ } = useTranslation();
 
+const dayLabel = (d: string) => d.charAt(0).toUpperCase() + d.slice(1);
+
+const planOptions = computed<SearchableSelectOption[]>(() =>
+    (props.plans ?? []).map(p => ({
+        value: p.id,
+        label: p.title,
+        description: p.start_date && p.end_date ? `${p.start_date} → ${p.end_date}` : undefined,
+    })),
+);
+
+const employeeOptions = computed<SearchableSelectOption[]>(() =>
+    (props.employees ?? []).map(e => ({
+        value: e.id,
+        label: e.full_name,
+        description: e.employee_code,
+    })),
+);
+
 const filteredAvailabilities = computed(() => {
     if (!props.form.employee_id) return [];
     return props.availabilities.filter(a => a.employee_id === props.form.employee_id);
 });
 
-const dayLabel = (d: string) => d.charAt(0).toUpperCase() + d.slice(1);
+const availabilityOptions = computed<SearchableSelectOption[]>(() =>
+    filteredAvailabilities.value.map(a => ({
+        value: a.id,
+        label: `${__(dayLabel(a.day_of_week))} · ${a.start_time}–${a.end_time}`,
+    })),
+);
+
+const statusOptions = computed<SearchableSelectOption[]>(() =>
+    props.statuses.map(s => ({
+        value: s,
+        label: __(s),
+    })),
+);
+
+const planValue = computed({
+    get: () => props.form.employee_plan_id,
+    set: (v) => { props.form.employee_plan_id = v == null ? null : Number(v); },
+});
+
+const employeeValue = computed({
+    get: () => props.form.employee_id,
+    set: (v) => {
+        props.form.employee_id = v == null ? null : Number(v);
+        props.form.employee_availability_id = null;
+    },
+});
+
+const availabilityValue = computed({
+    get: () => props.form.employee_availability_id,
+    set: (v) => { props.form.employee_availability_id = v == null ? null : Number(v); },
+});
+
+const statusValue = computed({
+    get: () => props.form.status,
+    set: (v) => { props.form.status = (v as string) ?? ''; },
+});
+
+const availabilityPlaceholder = computed(() => {
+    if (!props.form.employee_id) return __('Pick an employee first');
+    if (!filteredAvailabilities.value.length) return __('No active slots for this employee');
+    return __('Choose a slot');
+});
 </script>
 
 <template>
     <div class="space-y-4">
-        <!-- Plan -->
-        <div v-if="props.mode === 'create'" class="space-y-2">
-            <Label for="employee_plan_id">
-                {{ __('Plan') }} <span class="text-destructive">*</span>
-            </Label>
-            <Select
-                :model-value="props.form.employee_plan_id?.toString() || ''"
-                @update:model-value="(v) => (props.form.employee_plan_id = v ? Number(v) : null)"
-            >
-                <SelectTrigger :class="{ 'border-destructive': props.form.errors.employee_plan_id }">
-                    <SelectValue :placeholder="__('Select Plan')" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem
-                        v-for="plan in props.plans"
-                        :key="plan.id"
-                        :value="plan.id.toString()"
-                    >
-                        {{ plan.title }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-            <p v-if="props.form.errors.employee_plan_id" class="text-xs text-destructive">
-                {{ props.form.errors.employee_plan_id }}
-            </p>
+        <!-- Plan + Employee (create mode) -->
+        <div v-if="props.mode === 'create'" class="grid gap-4 sm:grid-cols-2">
+            <div class="space-y-2">
+                <Label for="employee_plan_id">
+                    {{ __('Plan') }} <span class="text-destructive">*</span>
+                </Label>
+                <SearchableSelect
+                    v-model="planValue"
+                    :options="planOptions"
+                    :placeholder="__('Select a plan')"
+                    :search-placeholder="__('Search plans...')"
+                    :empty-message="__('No plans found.')"
+                />
+                <p v-if="props.form.errors.employee_plan_id" class="text-xs text-destructive">
+                    {{ props.form.errors.employee_plan_id }}
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <Label for="employee_id">
+                    {{ __('Employee') }} <span class="text-destructive">*</span>
+                </Label>
+                <SearchableSelect
+                    v-model="employeeValue"
+                    :options="employeeOptions"
+                    :placeholder="__('Select an employee')"
+                    :search-placeholder="__('Search employees...')"
+                    :empty-message="__('No employees found.')"
+                />
+                <p v-if="props.form.errors.employee_id" class="text-xs text-destructive">
+                    {{ props.form.errors.employee_id }}
+                </p>
+            </div>
         </div>
 
-        <!-- Employee -->
-        <div v-if="props.mode === 'create'" class="space-y-2">
-            <Label for="employee_id">
-                {{ __('Employee') }} <span class="text-destructive">*</span>
-            </Label>
-            <Select
-                :model-value="props.form.employee_id?.toString() || ''"
-                @update:model-value="(v) => {
-                    props.form.employee_id = v ? Number(v) : null;
-                    props.form.employee_availability_id = null;
-                }"
-            >
-                <SelectTrigger :class="{ 'border-destructive': props.form.errors.employee_id }">
-                    <SelectValue :placeholder="__('Select Employee')" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem
-                        v-for="employee in props.employees"
-                        :key="employee.id"
-                        :value="employee.id.toString()"
-                    >
-                        {{ employee.full_name }} ({{ employee.employee_code }})
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-            <p v-if="props.form.errors.employee_id" class="text-xs text-destructive">
-                {{ props.form.errors.employee_id }}
-            </p>
-        </div>
+        <!-- Availability + Status (edit mode shows both; create mode just availability spanning) -->
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div class="space-y-2">
+                <Label for="employee_availability_id">
+                    {{ __('Availability Slot') }}
+                    <span class="text-xs text-muted-foreground ml-1">({{ __('optional') }})</span>
+                </Label>
+                <SearchableSelect
+                    v-model="availabilityValue"
+                    :options="availabilityOptions"
+                    :placeholder="availabilityPlaceholder"
+                    :search-placeholder="__('Search slots...')"
+                    :empty-message="__('No slots match.')"
+                    :disabled="!props.form.employee_id || availabilityOptions.length === 0"
+                />
+                <p v-if="props.form.errors.employee_availability_id" class="text-xs text-destructive">
+                    {{ props.form.errors.employee_availability_id }}
+                </p>
+            </div>
 
-        <!-- Availability slot (optional) -->
-        <div class="space-y-2">
-            <Label for="employee_availability_id">
-                {{ __('Availability Slot') }}
-                <span class="text-xs text-muted-foreground ml-1">({{ __('optional') }})</span>
-            </Label>
-            <Select
-                :model-value="props.form.employee_availability_id?.toString() || ''"
-                @update:model-value="(v) => (props.form.employee_availability_id = v && v !== 'none' ? Number(v) : null)"
-            >
-                <SelectTrigger>
-                    <SelectValue :placeholder="props.form.employee_id
-                        ? (filteredAvailabilities.length ? __('Choose a slot') : __('No active slots for this employee'))
-                        : __('Pick an employee first')" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="none">{{ __('— None —') }}</SelectItem>
-                    <SelectItem
-                        v-for="slot in filteredAvailabilities"
-                        :key="slot.id"
-                        :value="slot.id.toString()"
-                    >
-                        {{ __(dayLabel(slot.day_of_week)) }} · {{ slot.start_time }}–{{ slot.end_time }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-            <p v-if="props.form.errors.employee_availability_id" class="text-xs text-destructive">
-                {{ props.form.errors.employee_availability_id }}
-            </p>
-        </div>
-
-        <!-- Status (edit) -->
-        <div v-if="props.mode === 'edit'" class="space-y-2">
-            <Label for="status">
-                {{ __('Status') }} <span class="text-destructive">*</span>
-            </Label>
-            <Select v-model="props.form.status">
-                <SelectTrigger :class="{ 'border-destructive': props.form.errors.status }">
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem v-for="s in props.statuses" :key="s" :value="s">{{ __(s) }}</SelectItem>
-                </SelectContent>
-            </Select>
-            <p v-if="props.form.errors.status" class="text-xs text-destructive">
-                {{ props.form.errors.status }}
-            </p>
+            <div v-if="props.mode === 'edit'" class="space-y-2">
+                <Label for="status">
+                    {{ __('Status') }} <span class="text-destructive">*</span>
+                </Label>
+                <SearchableSelect
+                    v-model="statusValue"
+                    :options="statusOptions"
+                    :placeholder="__('Select status')"
+                    :search-placeholder="__('Search status...')"
+                />
+                <p v-if="props.form.errors.status" class="text-xs text-destructive">
+                    {{ props.form.errors.status }}
+                </p>
+            </div>
         </div>
 
         <!-- Notes -->
