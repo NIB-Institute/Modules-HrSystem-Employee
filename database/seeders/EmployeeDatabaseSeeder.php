@@ -16,6 +16,9 @@ class EmployeeDatabaseSeeder extends Seeder
             EmployeeSeeder::class,
             AttendanceSeeder::class,
             PermissionRequestSeeder::class,
+            EmployeePlanSeeder::class,
+            EmployeeAvailabilitySeeder::class,
+            EmployeePlanAssignmentSeeder::class,
         ]);
     }
 }

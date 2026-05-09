@@ -26,23 +26,23 @@ class GetEmployeeTypeIndexDataAction
         $employeeTypes = $query->latest()->paginate($perPage);
 
         $stats = [
-            'total' => EmployeeType::count(),
-            'active' => EmployeeType::where('status', true)->count(),
-            'inactive' => EmployeeType::where('status', false)->count(),
+            'total'     => EmployeeType::count(),
+            'active'    => EmployeeType::where('status', true)->count(),
+            'inactive'  => EmployeeType::where('status', false)->count(),
         ];
 
         return [
             'employeeTypes' => [
-                'data' => EmployeeTypeResource::collection($employeeTypes)->resolve(),
-                'meta' => [
-                    'current_page' => $employeeTypes->currentPage(),
-                    'last_page' => $employeeTypes->lastPage(),
-                    'per_page' => $employeeTypes->perPage(),
-                    'total' => $employeeTypes->total(),
+                'data'      => EmployeeTypeResource::collection($employeeTypes)->resolve(),
+                'meta'      => [
+                    'current_page'   => $employeeTypes->currentPage(),
+                    'last_page'      => $employeeTypes->lastPage(),
+                    'per_page'       => $employeeTypes->perPage(),
+                    'total'          => $employeeTypes->total(),
                 ],
             ],
             'filters' => $filters,
-            'stats' => $stats,
+            'stats'   => $stats,
         ];
     }
 }

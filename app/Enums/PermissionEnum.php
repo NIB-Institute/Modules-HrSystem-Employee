@@ -156,6 +156,32 @@ enum PermissionEnum: string
     case EMPLOYEE_JOB_EXPERIENCES_RESTORE = 'employee_job_experiences.restore';
     case EMPLOYEE_JOB_EXPERIENCES_FORCE_DELETE = 'employee_job_experiences.force_delete';
 
+    // ----- employee_plans -----
+    case EMPLOYEE_PLANS_VIEW = 'employee_plans.view';
+    case EMPLOYEE_PLANS_VIEW_ANY = 'employee_plans.view_any';
+    case EMPLOYEE_PLANS_CREATE = 'employee_plans.create';
+    case EMPLOYEE_PLANS_UPDATE = 'employee_plans.update';
+    case EMPLOYEE_PLANS_DELETE = 'employee_plans.delete';
+    case EMPLOYEE_PLANS_RESTORE = 'employee_plans.restore';
+    case EMPLOYEE_PLANS_FORCE_DELETE = 'employee_plans.force_delete';
+
+    // ----- employee_availabilities -----
+    case EMPLOYEE_AVAILABILITIES_VIEW = 'employee_availabilities.view';
+    case EMPLOYEE_AVAILABILITIES_VIEW_ANY = 'employee_availabilities.view_any';
+    case EMPLOYEE_AVAILABILITIES_CREATE = 'employee_availabilities.create';
+    case EMPLOYEE_AVAILABILITIES_UPDATE = 'employee_availabilities.update';
+    case EMPLOYEE_AVAILABILITIES_DELETE = 'employee_availabilities.delete';
+    case EMPLOYEE_AVAILABILITIES_RESTORE = 'employee_availabilities.restore';
+    case EMPLOYEE_AVAILABILITIES_FORCE_DELETE = 'employee_availabilities.force_delete';
+
+    // ----- employee_plan_assignments -----
+    case EMPLOYEE_PLAN_ASSIGNMENTS_VIEW = 'employee_plan_assignments.view';
+    case EMPLOYEE_PLAN_ASSIGNMENTS_VIEW_ANY = 'employee_plan_assignments.view_any';
+    case EMPLOYEE_PLAN_ASSIGNMENTS_CREATE = 'employee_plan_assignments.create';
+    case EMPLOYEE_PLAN_ASSIGNMENTS_UPDATE = 'employee_plan_assignments.update';
+    case EMPLOYEE_PLAN_ASSIGNMENTS_DELETE = 'employee_plan_assignments.delete';
+    case EMPLOYEE_PLAN_ASSIGNMENTS_BULK_ASSIGN = 'employee_plan_assignments.bulk_assign';
+
     /**
      * Plain string values for every case. Used by the seeder.
      *

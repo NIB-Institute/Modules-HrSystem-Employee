@@ -9,6 +9,9 @@ use Modules\Employee\Http\Controllers\Dashboard\V1\AttendanceController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\LocationController;
 // use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeExperienceController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\PermissionRequestController;
+use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeePlanController;
+use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeePlanAssignmentController;
+use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeAvailabilityController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeTrashController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeTypeTrashController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\AttendanceTrashController;
@@ -170,6 +173,39 @@ Route::middleware(['auth', 'verified', 'auto.permission'])->prefix('dashboard')-
     Route::delete('permission-requests/{permission_request}', [PermissionRequestController::class, 'destroy'])->name('permission-requests.destroy');
     Route::get('permission-requests/{permission_request}/review', [PermissionRequestController::class, 'showReview'])->name('permission-requests.review');
     Route::post('permission-requests/{permission_request}/review', [PermissionRequestController::class, 'review'])->name('permission-requests.review.submit');
+
+    // Employee Plans CRUD
+    Route::get('employee-plans/create', [EmployeePlanController::class, 'create'])->name('employee-plans.create');
+    Route::post('employee-plans', [EmployeePlanController::class, 'store'])->name('employee-plans.store');
+    Route::get('employee-plans', [EmployeePlanController::class, 'index'])->name('employee-plans.index');
+    Route::get('employee-plans/{employeePlan}/edit', [EmployeePlanController::class, 'edit'])->name('employee-plans.edit');
+    Route::get('employee-plans/{employeePlan}', [EmployeePlanController::class, 'show'])->name('employee-plans.show');
+    Route::put('employee-plans/{employeePlan}', [EmployeePlanController::class, 'update'])->name('employee-plans.update');
+    Route::patch('employee-plans/{employeePlan}', [EmployeePlanController::class, 'update']);
+    Route::get('employee-plans/{employeePlan}/delete', [EmployeePlanController::class, 'confirmDelete'])->name('employee-plans.confirm-delete');
+    Route::delete('employee-plans/{employeePlan}', [EmployeePlanController::class, 'destroy'])->name('employee-plans.destroy');
+
+    // Employee Plan Assignments CRUD
+    Route::get('employee-plan-assignments/create', [EmployeePlanAssignmentController::class, 'create'])->name('employee-plan-assignments.create');
+    Route::post('employee-plan-assignments', [EmployeePlanAssignmentController::class, 'store'])->name('employee-plan-assignments.store');
+    Route::post('employee-plan-assignments/bulk-assign', [EmployeePlanAssignmentController::class, 'bulkAssign'])->name('employee-plan-assignments.bulk-assign');
+    Route::get('employee-plan-assignments', [EmployeePlanAssignmentController::class, 'index'])->name('employee-plan-assignments.index');
+    Route::get('employee-plan-assignments/{employeePlanAssignment}/edit', [EmployeePlanAssignmentController::class, 'edit'])->name('employee-plan-assignments.edit');
+    Route::get('employee-plan-assignments/{employeePlanAssignment}', [EmployeePlanAssignmentController::class, 'show'])->name('employee-plan-assignments.show');
+    Route::put('employee-plan-assignments/{employeePlanAssignment}', [EmployeePlanAssignmentController::class, 'update'])->name('employee-plan-assignments.update');
+    Route::patch('employee-plan-assignments/{employeePlanAssignment}', [EmployeePlanAssignmentController::class, 'update']);
+    Route::get('employee-plan-assignments/{employeePlanAssignment}/delete', [EmployeePlanAssignmentController::class, 'confirmDelete'])->name('employee-plan-assignments.confirm-delete');
+    Route::delete('employee-plan-assignments/{employeePlanAssignment}', [EmployeePlanAssignmentController::class, 'destroy'])->name('employee-plan-assignments.destroy');
+
+    // Employee Availabilities CRUD
+    Route::get('employee-availabilities/create', [EmployeeAvailabilityController::class, 'create'])->name('employee-availabilities.create');
+    Route::post('employee-availabilities', [EmployeeAvailabilityController::class, 'store'])->name('employee-availabilities.store');
+    Route::get('employee-availabilities', [EmployeeAvailabilityController::class, 'index'])->name('employee-availabilities.index');
+    Route::get('employee-availabilities/{employeeAvailability}/edit', [EmployeeAvailabilityController::class, 'edit'])->name('employee-availabilities.edit');
+    Route::put('employee-availabilities/{employeeAvailability}', [EmployeeAvailabilityController::class, 'update'])->name('employee-availabilities.update');
+    Route::patch('employee-availabilities/{employeeAvailability}', [EmployeeAvailabilityController::class, 'update']);
+    Route::get('employee-availabilities/{employeeAvailability}/delete', [EmployeeAvailabilityController::class, 'confirmDelete'])->name('employee-availabilities.confirm-delete');
+    Route::delete('employee-availabilities/{employeeAvailability}', [EmployeeAvailabilityController::class, 'destroy'])->name('employee-availabilities.destroy');
 
     // QR Code Generation
     Route::get('employees/{employee}/qr-code', [AttendanceController::class, 'generateEmployeeQr'])->name('employees.qr-code');
