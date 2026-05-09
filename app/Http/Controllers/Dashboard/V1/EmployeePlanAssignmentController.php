@@ -14,6 +14,7 @@ use Modules\Employee\Actions\Dashboard\V1\EmployeePlanAssignment\DeleteEmployeeP
 use Modules\Employee\Actions\Dashboard\V1\EmployeePlanAssignment\GetEmployeePlanAssignmentCreateDataAction;
 use Modules\Employee\Actions\Dashboard\V1\EmployeePlanAssignment\GetEmployeePlanAssignmentEditDataAction;
 use Modules\Employee\Actions\Dashboard\V1\EmployeePlanAssignment\GetEmployeePlanAssignmentIndexDataAction;
+use Modules\Employee\Actions\Dashboard\V1\EmployeePlanAssignment\GetEmployeePlanAssignmentShowDataAction;
 use Modules\Employee\Actions\Dashboard\V1\EmployeePlanAssignment\UpdateEmployeePlanAssignmentAction;
 use Modules\Employee\Http\Requests\Dashboard\V1\BulkAssignEmployeePlanRequest;
 use Modules\Employee\Http\Requests\Dashboard\V1\StoreEmployeePlanAssignmentRequest;
@@ -27,6 +28,7 @@ class EmployeePlanAssignmentController extends Controller
         protected GetEmployeePlanAssignmentIndexDataAction $getIndexDataAction,
         protected GetEmployeePlanAssignmentCreateDataAction $getCreateDataAction,
         protected GetEmployeePlanAssignmentEditDataAction $getEditDataAction,
+        protected GetEmployeePlanAssignmentShowDataAction $getShowDataAction,
         protected CreateEmployeePlanAssignmentAction $createAction,
         protected UpdateEmployeePlanAssignmentAction $updateAction,
         protected DeleteEmployeePlanAssignmentAction $deleteAction,
@@ -81,6 +83,13 @@ class EmployeePlanAssignmentController extends Controller
         return redirect()
             ->route('employee.employee-plan-assignments.index')
             ->with('success', $msg);
+    }
+
+    public function show(EmployeePlanAssignment $employeePlanAssignment): Response
+    {
+        $data = $this->getShowDataAction->execute($employeePlanAssignment);
+
+        return Inertia::render('employee::Dashboard/V1/EmployeePlanAssignment/Show', $data);
     }
 
     public function edit(EmployeePlanAssignment $employeePlanAssignment): Modal

@@ -39,27 +39,27 @@ class GetEmployeePlanIndexDataAction
         $plans = $query->orderByDesc('start_date')->paginate($perPage)->withQueryString();
 
         $stats = [
-            'total' => EmployeePlan::count(),
-            'scheduled' => EmployeePlan::where('status', 'scheduled')->count(),
+            'total'       => EmployeePlan::count(),
+            'scheduled'   => EmployeePlan::where('status', 'scheduled')->count(),
             'in_progress' => EmployeePlan::where('status', 'in_progress')->count(),
-            'completed' => EmployeePlan::where('status', 'completed')->count(),
+            'completed'   => EmployeePlan::where('status', 'completed')->count(),
         ];
 
         return [
             'plans' => [
                 'data' => EmployeePlanResource::collection($plans)->resolve(),
                 'meta' => [
-                    'current_page' => $plans->currentPage(),
-                    'last_page' => $plans->lastPage(),
-                    'per_page' => $plans->perPage(),
-                    'total' => $plans->total(),
+                    'current_page'  => $plans->currentPage(),
+                    'last_page'     => $plans->lastPage(),
+                    'per_page'      => $plans->perPage(),
+                    'total'         => $plans->total(),
                 ],
                 'links' => $plans->linkCollection()->toArray(),
             ],
-            'filters' => $filters,
-            'stats' => $stats,
-            'priorities' => EmployeePlanEnum::PRIORITIES,
-            'statuses' => EmployeePlanEnum::STATUSES,
+            'filters'      => $filters,
+            'stats'        => $stats,
+            'priorities'   => EmployeePlanEnum::PRIORITIES,
+            'statuses'     => EmployeePlanEnum::STATUSES,
         ];
     }
 }

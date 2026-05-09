@@ -19,16 +19,16 @@ class GetEmployeeAvailabilityEditDataAction
             ->orderBy('first_name')
             ->get()
             ->map(fn ($e) => [
-                'id' => $e->id,
-                'uuid' => $e->uuid,
-                'full_name' => trim("{$e->first_name} {$e->last_name}"),
+                'id'      => $e->id,
+                'uuid'    => $e->uuid,
+                'full_name'     => trim("{$e->first_name} {$e->last_name}"),
                 'employee_code' => $e->employee_code,
             ]);
 
         return [
             'availability' => (new EmployeeAvailabilityResource($employeeAvailability))->resolve(),
-            'employees' => $employees,
-            'days' => EmployeeAvailabilityEnum::DAYS,
+            'employees'    => $employees,
+            'days'         => EmployeeAvailabilityEnum::DAYS,
         ];
     }
 }

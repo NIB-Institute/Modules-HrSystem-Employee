@@ -13,11 +13,11 @@ class GetEmployeePlanEditDataAction
         $employeePlan->loadCount('assignments');
 
         return [
-            'plan' => (new EmployeePlanResource($employeePlan))->resolve(),
-            'priorities' => EmployeePlanEnum::PRIORITIES,
-            'scheduleModes' => EmployeePlanEnum::SCHEDULE_MODES,
-            'recurrenceTypes' => EmployeePlanEnum::RECURRENCE_TYPES,
-            'statuses' => EmployeePlanEnum::STATUSES,
+            'plan'              => (new EmployeePlanResource($employeePlan))->resolve(),
+            'priorities'        => EmployeePlanEnum::PRIORITIES,
+            'scheduleModes'     => EmployeePlanEnum::SCHEDULE_MODES,
+            'recurrenceTypes'   => EmployeePlanEnum::RECURRENCE_TYPES,
+            'statuses'          => EmployeePlanEnum::STATUSES,
         ];
     }
 }

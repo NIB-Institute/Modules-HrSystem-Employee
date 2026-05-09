@@ -9,10 +9,10 @@ class GetEmployeePlanCreateDataAction
     public function execute(): array
     {
         return [
-            'priorities' => EmployeePlanEnum::PRIORITIES,
-            'scheduleModes' => EmployeePlanEnum::SCHEDULE_MODES,
+            'priorities'      => EmployeePlanEnum::PRIORITIES,
+            'scheduleModes'   => EmployeePlanEnum::SCHEDULE_MODES,
             'recurrenceTypes' => EmployeePlanEnum::RECURRENCE_TYPES,
-            'statuses' => EmployeePlanEnum::STATUSES,
+            'statuses'        => EmployeePlanEnum::STATUSES,
         ];
     }
 }

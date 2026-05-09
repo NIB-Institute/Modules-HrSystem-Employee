@@ -14,6 +14,7 @@ use Modules\Employee\Actions\Dashboard\V1\EmployeePlan\DeleteEmployeePlanAction;
 use Modules\Employee\Actions\Dashboard\V1\EmployeePlan\GetEmployeePlanCreateDataAction;
 use Modules\Employee\Actions\Dashboard\V1\EmployeePlan\GetEmployeePlanEditDataAction;
 use Modules\Employee\Actions\Dashboard\V1\EmployeePlan\GetEmployeePlanIndexDataAction;
+use Modules\Employee\Actions\Dashboard\V1\EmployeePlan\GetEmployeePlanShowDataAction;
 use Modules\Employee\Actions\Dashboard\V1\EmployeePlan\UpdateEmployeePlanAction;
 use Modules\Employee\Http\Requests\Dashboard\V1\StoreEmployeePlanRequest;
 use Modules\Employee\Http\Requests\Dashboard\V1\UpdateEmployeePlanRequest;
@@ -26,6 +27,7 @@ class EmployeePlanController extends Controller
         protected GetEmployeePlanIndexDataAction $getIndexDataAction,
         protected GetEmployeePlanCreateDataAction $getCreateDataAction,
         protected GetEmployeePlanEditDataAction $getEditDataAction,
+        protected GetEmployeePlanShowDataAction $getShowDataAction,
         protected CreateEmployeePlanAction $createAction,
         protected UpdateEmployeePlanAction $updateAction,
         protected DeleteEmployeePlanAction $deleteAction,
@@ -59,6 +61,14 @@ class EmployeePlanController extends Controller
         return redirect()
             ->route('employee.employee-plans.index')
             ->with('success', 'Plan created successfully.');
+    }
+
+    public function show(Request $request, EmployeePlan $employeePlan): Response
+    {
+        $perPage = (int) $request->input('per_page', 15);
+        $data = $this->getShowDataAction->execute($employeePlan, $perPage);
+
+        return Inertia::render('employee::Dashboard/V1/EmployeePlan/Show', $data);
     }
 
     public function edit(EmployeePlan $employeePlan): Modal

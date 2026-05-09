@@ -27,7 +27,7 @@ class BulkDeleteEmployeeTypesAction
 
         return [
             'deleted' => $deleted,
-            'failed' => $failed,
+            'failed'  => $failed,
         ];
     }
 }

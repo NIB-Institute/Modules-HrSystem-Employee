@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import {
-    Plus, Search, Pencil, Trash2,
+    Plus, Search, Pencil, Trash2, Eye,
     UsersRound, ListChecks, PlayCircle, CheckCircle,
 } from 'lucide-vue-next';
 import type { BreadcrumbItem } from '@/types';
@@ -78,6 +78,11 @@ const columns: TableColumn<AssignmentRow>[] = [
 ];
 
 const actions: TableAction<AssignmentRow>[] = [
+    {
+        label: __('View'),
+        icon: Eye,
+        onClick: (item) => router.visit(`/dashboard/employee-plan-assignments/${item.uuid}`),
+    },
     {
         label: __('Edit'),
         icon: Pencil,

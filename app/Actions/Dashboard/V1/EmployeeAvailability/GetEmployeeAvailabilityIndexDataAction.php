@@ -47,9 +47,9 @@ class GetEmployeeAvailabilityIndexDataAction
             ->withQueryString();
 
         $stats = [
-            'total' => EmployeeAvailability::count(),
-            'active' => EmployeeAvailability::where('is_active', true)->count(),
-            'inactive' => EmployeeAvailability::where('is_active', false)->count(),
+            'total'     => EmployeeAvailability::count(),
+            'active'    => EmployeeAvailability::where('is_active', true)->count(),
+            'inactive'  => EmployeeAvailability::where('is_active', false)->count(),
             'employees_covered' => EmployeeAvailability::distinct('employee_id')->count('employee_id'),
         ];
 
@@ -58,15 +58,15 @@ class GetEmployeeAvailabilityIndexDataAction
                 'data' => EmployeeAvailabilityResource::collection($availabilities)->resolve(),
                 'meta' => [
                     'current_page' => $availabilities->currentPage(),
-                    'last_page' => $availabilities->lastPage(),
-                    'per_page' => $availabilities->perPage(),
-                    'total' => $availabilities->total(),
+                    'last_page'    => $availabilities->lastPage(),
+                    'per_page'     => $availabilities->perPage(),
+                    'total'        => $availabilities->total(),
                 ],
-                'links' => $availabilities->linkCollection()->toArray(),
+                'links'             => $availabilities->linkCollection()->toArray(),
             ],
             'filters' => $filters,
-            'stats' => $stats,
-            'days' => EmployeeAvailabilityEnum::DAYS,
+            'stats'   => $stats,
+            'days'    => EmployeeAvailabilityEnum::DAYS,
         ];
     }
 }

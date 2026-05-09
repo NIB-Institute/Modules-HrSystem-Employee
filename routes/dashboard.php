@@ -179,6 +179,7 @@ Route::middleware(['auth', 'verified', 'auto.permission'])->prefix('dashboard')-
     Route::post('employee-plans', [EmployeePlanController::class, 'store'])->name('employee-plans.store');
     Route::get('employee-plans', [EmployeePlanController::class, 'index'])->name('employee-plans.index');
     Route::get('employee-plans/{employeePlan}/edit', [EmployeePlanController::class, 'edit'])->name('employee-plans.edit');
+    Route::get('employee-plans/{employeePlan}', [EmployeePlanController::class, 'show'])->name('employee-plans.show');
     Route::put('employee-plans/{employeePlan}', [EmployeePlanController::class, 'update'])->name('employee-plans.update');
     Route::patch('employee-plans/{employeePlan}', [EmployeePlanController::class, 'update']);
     Route::get('employee-plans/{employeePlan}/delete', [EmployeePlanController::class, 'confirmDelete'])->name('employee-plans.confirm-delete');
@@ -190,6 +191,7 @@ Route::middleware(['auth', 'verified', 'auto.permission'])->prefix('dashboard')-
     Route::post('employee-plan-assignments/bulk-assign', [EmployeePlanAssignmentController::class, 'bulkAssign'])->name('employee-plan-assignments.bulk-assign');
     Route::get('employee-plan-assignments', [EmployeePlanAssignmentController::class, 'index'])->name('employee-plan-assignments.index');
     Route::get('employee-plan-assignments/{employeePlanAssignment}/edit', [EmployeePlanAssignmentController::class, 'edit'])->name('employee-plan-assignments.edit');
+    Route::get('employee-plan-assignments/{employeePlanAssignment}', [EmployeePlanAssignmentController::class, 'show'])->name('employee-plan-assignments.show');
     Route::put('employee-plan-assignments/{employeePlanAssignment}', [EmployeePlanAssignmentController::class, 'update'])->name('employee-plan-assignments.update');
     Route::patch('employee-plan-assignments/{employeePlanAssignment}', [EmployeePlanAssignmentController::class, 'update']);
     Route::get('employee-plan-assignments/{employeePlanAssignment}/delete', [EmployeePlanAssignmentController::class, 'confirmDelete'])->name('employee-plan-assignments.confirm-delete');
