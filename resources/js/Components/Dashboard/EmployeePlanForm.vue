@@ -10,6 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useTranslation } from '@/composables/useTranslation';
+import TiptapEditor from '@/components/TiptapEditor.vue';
 
 export interface EmployeePlanFormShape {
     title: string;
@@ -208,7 +209,7 @@ const { __ } = useTranslation();
         <!-- Description -->
         <div class="space-y-2">
             <Label for="description">{{ __('Description') }}</Label>
-            <Textarea
+            <TiptapEditor
                 id="description"
                 v-model="props.form.description"
                 :placeholder="__('Optional details about this plan...')"
