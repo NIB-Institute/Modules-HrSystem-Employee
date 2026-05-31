@@ -83,60 +83,64 @@ class DashboardMiddlewareHandle
             'CalendarRange',
         );
 
-        MenuService::addSubmenuItem(
-            'primary',
-            'employees',
-            __('Self Service'),
-            route('employee.attendances.self-service'),
-            60,
-            null,
-            'employee.attendances.self-service',
-            'LogIn',
-        );
+        /**
+         * just uncommenting these for now, 
+         * you will use the other fearture menu on the sidebar back
+         */
+        // MenuService::addSubmenuItem(
+        //     'primary',
+        //     'employees',
+        //     __('Self Service'),
+        //     route('employee.attendances.self-service'),
+        //     60,
+        //     null,
+        //     'employee.attendances.self-service',
+        //     'LogIn',
+        // );
 
-        MenuService::addSubmenuItem(
-            'primary',
-            'employees',
-            __('Attendance'),
-            route('employee.attendances.index'),
-            70,
-            PermissionEnum::ATTENDANCES_VIEW_ANY->value,
-            'employee.attendances.*',
-            'ClipboardCheck',
-        );
+        // MenuService::addSubmenuItem(
+        //     'primary',
+        //     'employees',
+        //     __('Attendance'),
+        //     route('employee.attendances.index'),
+        //     70,
+        //     PermissionEnum::ATTENDANCES_VIEW_ANY->value,
+        //     'employee.attendances.*',
+        //     'ClipboardCheck',
+        // );
 
-        MenuService::addSubmenuItem(
-            'primary',
-            'employees',
-            __('QR Scanner'),
-            route('employee.attendances.scanner'),
-            80,
-            PermissionEnum::ATTENDANCES_SCAN_QR->value,
-            'employee.attendances.scanner',
-            'QrCode',
-        );
+        // MenuService::addSubmenuItem(
+        //     'primary',
+        //     'employees',
+        //     __('QR Scanner'),
+        //     route('employee.attendances.scanner'),
+        //     80,
+        //     PermissionEnum::ATTENDANCES_SCAN_QR->value,
+        //     'employee.attendances.scanner',
+        //     'QrCode',
+        // );
 
-        MenuService::addSubmenuItem(
-            'primary',
-            'employees',
-            __('Scan Locations'),
-            route('employee.locations.index'),
-            90,
-            PermissionEnum::LOCATIONS_VIEW_ANY->value,
-            'employee.locations.*',
-            'MapPin',
-        );
+        // MenuService::addSubmenuItem(
+        //     'primary',
+        //     'employees',
+        //     __('Scan Locations'),
+        //     route('employee.locations.index'),
+        //     90,
+        //     PermissionEnum::LOCATIONS_VIEW_ANY->value,
+        //     'employee.locations.*',
+        //     'MapPin',
+        // );
 
-        MenuService::addSubmenuItem(
-            'primary',
-            'employees',
-            __('Permission Requests'),
-            route('employee.permission-requests.index'),
-            100,
-            PermissionEnum::PERMISSION_REQUESTS_VIEW_ANY->value,
-            'employee.permission-requests.*',
-            'FileText',
-        );
+        // MenuService::addSubmenuItem(
+        //     'primary',
+        //     'employees',
+        //     __('Permission Requests'),
+        //     route('employee.permission-requests.index'),
+        //     100,
+        //     PermissionEnum::PERMISSION_REQUESTS_VIEW_ANY->value,
+        //     'employee.permission-requests.*',
+        //     'FileText',
+        // );
 
         return $next($request);
     }
