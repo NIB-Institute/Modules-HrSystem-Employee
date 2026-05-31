@@ -178,6 +178,7 @@ class SendPlanReminderJob implements ShouldQueue
                 '👥 ' . __('employee::plan_reminders.labels.team') . ' (' . count($assignees) . '):',
                 ...$names,
                 $sep,
+                (string) __("{$key}.footer"),
             ];
 
             return [
