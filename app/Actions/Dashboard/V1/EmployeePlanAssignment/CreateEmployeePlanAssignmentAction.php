@@ -3,6 +3,7 @@
 namespace Modules\Employee\Actions\Dashboard\V1\EmployeePlanAssignment;
 
 use Modules\Employee\Enums\EmployeePlanAssignmentEnum;
+use Modules\Employee\Events\EmployeePlanAssignmentCreated;
 use Modules\Employee\Models\EmployeePlan;
 use Modules\Employee\Models\EmployeePlanAssignment;
 
@@ -29,6 +30,11 @@ class CreateEmployeePlanAssignmentAction
             }
         }
 
-        return $assignment->fresh();
+        $fresh = $assignment->fresh();
+
+        // Post on-assignment alert to the plan's Telegram group (queued).
+        EmployeePlanAssignmentCreated::dispatch($fresh);
+
+        return $fresh;
     }
 }
