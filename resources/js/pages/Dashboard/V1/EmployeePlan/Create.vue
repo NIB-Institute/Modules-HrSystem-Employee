@@ -38,6 +38,8 @@ const form = useForm({
     end_time: '',
     priority: 'medium',
     location: '',
+    telegram_group_chat_id: '',
+    telegram_group_name: '',
     schedule_mode: 'single',
     is_recurring: false,
     recurrence_type: '',

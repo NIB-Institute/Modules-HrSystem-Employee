@@ -3,6 +3,7 @@
 namespace Modules\Employee\Models;
 
 use App\Traits\BelongsToSchool;
+use App\Traits\HasNotifications;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Modules\School\Models\School;
@@ -25,7 +27,7 @@ use Modules\Employee\Enums\FamilyRelationshipEnum;
 
 class Employee extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToSchool;
+    use HasFactory, SoftDeletes, BelongsToSchool, Notifiable, HasNotifications;
     // use HasSwitchDatabase;
 
     /**
@@ -47,6 +49,9 @@ class Employee extends Model
         'last_name',
         'email',
         'phone_number',
+        'telegram_chat_id',
+        'telegram_username',
+        'telegram_linked_at',
         'gender',
         'marital_status',
         'date_of_birth',
@@ -89,6 +94,7 @@ class Employee extends Model
         'probation_end_date' => 'date',
         'id_card_issued_date' => 'date',
         'id_card_expiry_date' => 'date',
+        'telegram_linked_at' => 'datetime',
         'salary' => 'decimal:2',
         'status' => 'boolean',
         'marital_status' => MaritalStatusEnum::class,

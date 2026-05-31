@@ -18,6 +18,8 @@ interface PlanResource {
     end_time: string | null;
     priority: string;
     location: string | null;
+    telegram_group_chat_id: string | null;
+    telegram_group_name: string | null;
     schedule_mode: string;
     is_recurring: boolean;
     recurrence_type: string | null;
@@ -57,6 +59,8 @@ const form = useForm({
     end_time: props.plan.end_time ?? '',
     priority: props.plan.priority,
     location: props.plan.location ?? '',
+    telegram_group_chat_id: props.plan.telegram_group_chat_id ?? '',
+    telegram_group_name: props.plan.telegram_group_name ?? '',
     schedule_mode: props.plan.schedule_mode,
     is_recurring: props.plan.is_recurring,
     recurrence_type: props.plan.recurrence_type ?? '',

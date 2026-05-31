@@ -30,6 +30,8 @@ class EmployeePlan extends Model
         'end_time',
         'priority',
         'location',
+        'telegram_group_chat_id',
+        'telegram_group_name',
         'schedule_mode',
         'is_recurring',
         'recurrence_type',

@@ -46,7 +46,9 @@ class EmployeeServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            \Modules\Employee\Console\Commands\SendEmployeePlanRemindersCommand::class,
+        ]);
     }
 
     /**

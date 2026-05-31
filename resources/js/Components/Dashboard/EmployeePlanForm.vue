@@ -21,6 +21,8 @@ export interface EmployeePlanFormShape {
     end_time: string;
     priority: string;
     location: string;
+    telegram_group_chat_id: string;
+    telegram_group_name: string;
     schedule_mode: string;
     is_recurring: boolean;
     recurrence_type: string;
@@ -177,6 +179,40 @@ const { __ } = useTranslation();
                 <p v-if="props.form.errors.valid_for_months" class="text-xs text-destructive">
                     {{ props.form.errors.valid_for_months }}
                 </p>
+            </div>
+        </div>
+
+        <!-- Telegram Group (for plan reminders) -->
+        <div class="rounded-lg border bg-muted/30 p-4 space-y-3">
+            <div class="space-y-1">
+                <Label class="text-sm font-medium">{{ __('Telegram Group (Reminders)') }}</Label>
+                <p class="text-xs text-muted-foreground">
+                    {{ __('When set, assignment and countdown reminders for this plan are posted to this Telegram chat. Leave empty to disable.') }}
+                </p>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div class="space-y-2">
+                    <Label for="telegram_group_chat_id" class="text-xs font-medium">{{ __('Group Chat ID') }}</Label>
+                    <Input
+                        id="telegram_group_chat_id"
+                        v-model="props.form.telegram_group_chat_id"
+                        :placeholder="__('e.g. -1001234567890')"
+                    />
+                    <p v-if="props.form.errors.telegram_group_chat_id" class="text-xs text-destructive">
+                        {{ props.form.errors.telegram_group_chat_id }}
+                    </p>
+                </div>
+                <div class="space-y-2">
+                    <Label for="telegram_group_name" class="text-xs font-medium">{{ __('Group Name (label)') }}</Label>
+                    <Input
+                        id="telegram_group_name"
+                        v-model="props.form.telegram_group_name"
+                        :placeholder="__('e.g. Morning Shift Team')"
+                    />
+                    <p v-if="props.form.errors.telegram_group_name" class="text-xs text-destructive">
+                        {{ props.form.errors.telegram_group_name }}
+                    </p>
+                </div>
             </div>
         </div>
 

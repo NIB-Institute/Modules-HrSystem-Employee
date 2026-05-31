@@ -24,6 +24,8 @@ class StoreEmployeePlanRequest extends FormRequest
             'end_time' => ['nullable', 'date_format:H:i', 'after:start_time'],
             'priority' => ['required', Rule::in(EmployeePlanEnum::PRIORITIES)],
             'location' => ['nullable', 'string', 'max:255'],
+            'telegram_group_chat_id' => ['nullable', 'string', 'max:255'],
+            'telegram_group_name' => ['nullable', 'string', 'max:255'],
             'schedule_mode' => ['required', Rule::in(EmployeePlanEnum::SCHEDULE_MODES)],
             'is_recurring' => ['boolean'],
             'recurrence_type' => ['nullable', 'required_if:is_recurring,true', Rule::in(EmployeePlanEnum::RECURRENCE_TYPES)],

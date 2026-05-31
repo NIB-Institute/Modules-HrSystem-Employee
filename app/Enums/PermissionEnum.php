@@ -32,6 +32,7 @@ enum PermissionEnum: string
     case EMPLOYEES_MANAGE_ACCOUNT = 'employees.manage_account';
     case EMPLOYEES_BULK_DELETE = 'employees.bulk_delete';
     case EMPLOYEES_TOGGLE_STATUS = 'employees.toggle_status';
+    case EMPLOYEES_MANAGE_TELEGRAM = 'employees.manage_telegram';
 
     // ----- employee_types -----
     case EMPLOYEE_TYPES_VIEW = 'employee_types.view';
