@@ -15,27 +15,31 @@ use Modules\Employee\Models\EmployeePlan;
  *   php artisan employee:telegram:test-plan-message
  *     -> picks the first plan that has a telegram_group_chat_id set
  *
- *   php artisan employee:telegram:test-plan-message {uuid}
- *     -> targets the plan with the given uuid
+ *   php artisan employee:telegram:test-plan-message {id}
+ *     -> targets the plan with the given numeric ID (or UUID also accepted)
  */
 class SendTestPlanMessageCommand extends Command
 {
-    protected $signature = 'employee:telegram:test-plan-message {uuid?}';
+    protected $signature = 'employee:telegram:test-plan-message {plan?}';
 
-    protected $description = 'Send a test reminder message to a plan\'s configured Telegram group (skips schedule window).';
+    protected $description = 'Send a test reminder message to a plan\'s configured Telegram group (skips schedule window). Pass plan id or uuid.';
 
     public function handle(TelegramChannel $telegram): int
     {
-        $uuid = $this->argument('uuid');
+        $identifier = $this->argument('plan');
 
-        $plan = $uuid
-            ? EmployeePlan::where('uuid', $uuid)->first()
-            : EmployeePlan::whereNotNull('telegram_group_chat_id')->first();
+        if ($identifier === null) {
+            $plan = EmployeePlan::whereNotNull('telegram_group_chat_id')->first();
+        } elseif (ctype_digit((string) $identifier)) {
+            $plan = EmployeePlan::find((int) $identifier);
+        } else {
+            $plan = EmployeePlan::where('uuid', $identifier)->first();
+        }
 
         if (! $plan) {
-            $this->error($uuid
-                ? "No plan found with uuid: {$uuid}"
-                : 'No plan with a telegram_group_chat_id was found. Set one on a plan first.');
+            $this->error($identifier === null
+                ? 'No plan with a telegram_group_chat_id was found. Set one on a plan first.'
+                : "No plan found with id/uuid: {$identifier}");
             return self::FAILURE;
         }
 
