@@ -156,6 +156,11 @@ export interface Employee {
     birth_place: string | null;
     ethnicity: string | null;
     current_address: string | null;
+    id_card_number: string | null;
+    id_card_front_url: string | null;
+    id_card_back_url: string | null;
+    id_card_issued_date: string | null;
+    id_card_expiry_date: string | null;
     school_id: number | null;
     department_id: number | null;
     position_id: number | null;
@@ -287,6 +292,11 @@ export interface EmployeeFormData {
     birth_place: string;
     ethnicity: string;
     current_address: string;
+    id_card_number: string;
+    id_card_front_url: string;
+    id_card_back_url: string;
+    id_card_issued_date: string;
+    id_card_expiry_date: string;
     school_id: number | null;
     department_id: number | null;
     position_id: number | null;

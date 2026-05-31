@@ -12,7 +12,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { User, Mail, Phone, Calendar, MapPin, Heart } from 'lucide-vue-next';
+import { ImageUpload } from '@/components/shared';
+import { User, Mail, Phone, Calendar, MapPin, Heart, CreditCard } from 'lucide-vue-next';
 import type { InertiaForm } from '@inertiajs/vue3';
 import type { EmployeeFormData, MaritalStatusOption } from '../../../../types';
 
@@ -54,6 +55,20 @@ const selectedMaritalStatus = computed({
                 (m) => m.relationship !== 'spouse'
             );
         }
+    },
+});
+
+const idCardFrontImages = computed({
+    get: () => (props.form.id_card_front_url ? [props.form.id_card_front_url] : []),
+    set: (value: string[]) => {
+        props.form.id_card_front_url = value.length > 0 ? value[0] : '';
+    },
+});
+
+const idCardBackImages = computed({
+    get: () => (props.form.id_card_back_url ? [props.form.id_card_back_url] : []),
+    set: (value: string[]) => {
+        props.form.id_card_back_url = value.length > 0 ? value[0] : '';
     },
 });
 </script>
@@ -215,6 +230,81 @@ const selectedMaritalStatus = computed({
                         <p v-if="form.errors.ethnicity" class="text-xs text-destructive">
                             {{ form.errors.ethnicity }}
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ID Card Section -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <CreditCard class="h-4 w-4" />
+                    <span>{{ __('ID Card') }}</span>
+                </div>
+                <div class="space-y-4 rounded-lg border bg-muted/30 p-4">
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <!-- ID Card Number -->
+                        <div class="space-y-2">
+                            <Label for="id_card_number" class="text-xs font-medium">{{ __('ID Card Number') }}</Label>
+                            <div class="relative">
+                                <CreditCard class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input id="id_card_number" v-model="form.id_card_number" type="text" :placeholder="__('e.g. 010101010')" class="pl-10 bg-background" />
+                            </div>
+                            <p v-if="form.errors.id_card_number" class="text-xs text-destructive">
+                                {{ form.errors.id_card_number }}
+                            </p>
+                        </div>
+
+                        <!-- Issued Date -->
+                        <div class="space-y-2">
+                            <Label for="id_card_issued_date" class="text-xs font-medium">{{ __('Issued Date') }}</Label>
+                            <div class="relative">
+                                <Calendar class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                <Input id="id_card_issued_date" v-model="form.id_card_issued_date" type="date" class="pl-10 bg-background" />
+                            </div>
+                            <p v-if="form.errors.id_card_issued_date" class="text-xs text-destructive">
+                                {{ form.errors.id_card_issued_date }}
+                            </p>
+                        </div>
+
+                        <!-- Expiry Date -->
+                        <div class="space-y-2">
+                            <Label for="id_card_expiry_date" class="text-xs font-medium">{{ __('Expiry Date') }}</Label>
+                            <div class="relative">
+                                <Calendar class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                <Input id="id_card_expiry_date" v-model="form.id_card_expiry_date" type="date" class="pl-10 bg-background" />
+                            </div>
+                            <p v-if="form.errors.id_card_expiry_date" class="text-xs text-destructive">
+                                {{ form.errors.id_card_expiry_date }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <!-- ID Card Front -->
+                        <div class="space-y-2">
+                            <Label class="text-xs font-medium">{{ __('ID Card Front') }}</Label>
+                            <ImageUpload
+                                v-model="idCardFrontImages"
+                                label=""
+                                :multiple="false"
+                                :max-files="1"
+                                :max-size="5"
+                                :error="form.errors.id_card_front_url"
+                            />
+                        </div>
+
+                        <!-- ID Card Back -->
+                        <div class="space-y-2">
+                            <Label class="text-xs font-medium">{{ __('ID Card Back') }}</Label>
+                            <ImageUpload
+                                v-model="idCardBackImages"
+                                label=""
+                                :multiple="false"
+                                :max-files="1"
+                                :max-size="5"
+                                :error="form.errors.id_card_back_url"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

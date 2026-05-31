@@ -135,6 +135,16 @@ export const employeeSchema = z.object({
         .max(500, 'Address must be less than 500 characters')
         .optional()
         .nullable(),
+    id_card_number: z
+        .string()
+        .max(50, 'ID card number must be less than 50 characters')
+        .optional()
+        .nullable()
+        .or(z.literal('')),
+    id_card_front_url: z.string().optional().nullable().or(z.literal('')),
+    id_card_back_url: z.string().optional().nullable().or(z.literal('')),
+    id_card_issued_date: z.string().optional().nullable().or(z.literal('')),
+    id_card_expiry_date: z.string().optional().nullable().or(z.literal('')),
     school_id: z.number().int().positive().optional().nullable(),
     department_id: z.number().int().positive().optional().nullable(),
     position_id: z.number().int().positive().optional().nullable(),
