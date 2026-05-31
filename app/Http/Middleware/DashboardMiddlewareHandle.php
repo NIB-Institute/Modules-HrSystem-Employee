@@ -83,6 +83,17 @@ class DashboardMiddlewareHandle
             'CalendarRange',
         );
 
+        MenuService::addSubmenuItem(
+            'primary',
+            'employees',
+            __('Documents'),
+            route('employee.documents.index'),
+            60,
+            PermissionEnum::EMPLOYEE_DOCUMENTS_VIEW_ANY->value,
+            'employee.documents.*',
+            'FileText',
+        );
+
         /**
          * just uncommenting these for now, 
          * you will use the other fearture menu on the sidebar back

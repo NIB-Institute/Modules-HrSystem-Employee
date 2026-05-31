@@ -34,6 +34,14 @@ enum PermissionEnum: string
     case EMPLOYEES_TOGGLE_STATUS = 'employees.toggle_status';
     case EMPLOYEES_MANAGE_TELEGRAM = 'employees.manage_telegram';
 
+    // ----- employee_documents -----
+    case EMPLOYEE_DOCUMENTS_VIEW = 'employee_documents.view';
+    case EMPLOYEE_DOCUMENTS_VIEW_ANY = 'employee_documents.view_any';
+    case EMPLOYEE_DOCUMENTS_CREATE = 'employee_documents.create';
+    case EMPLOYEE_DOCUMENTS_UPDATE = 'employee_documents.update';
+    case EMPLOYEE_DOCUMENTS_DELETE = 'employee_documents.delete';
+    case EMPLOYEE_DOCUMENTS_DOWNLOAD = 'employee_documents.download';
+
     // ----- employee_types -----
     case EMPLOYEE_TYPES_VIEW = 'employee_types.view';
     case EMPLOYEE_TYPES_VIEW_ANY = 'employee_types.view_any';

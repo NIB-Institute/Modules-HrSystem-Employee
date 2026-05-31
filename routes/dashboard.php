@@ -11,6 +11,7 @@ use Modules\Employee\Http\Controllers\Dashboard\V1\LocationController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\PermissionRequestController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeePlanController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeePlanAssignmentController;
+use Modules\Employee\Http\Controllers\Dashboard\V1\DocumentController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeAvailabilityController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeTrashController;
 use Modules\Employee\Http\Controllers\Dashboard\V1\EmployeeTypeTrashController;
@@ -113,6 +114,17 @@ Route::middleware(['auth', 'verified', 'auto.permission'])->prefix('dashboard')-
     Route::put('employee-types/{employee_type}/toggle-status', [EmployeeTypeController::class, 'toggleStatus'])->name('employee-types.toggle-status');
     Route::get('employee-types/{employee_type}/delete', [EmployeeTypeController::class, 'confirmDelete'])->name('employee-types.confirm-delete');
     Route::delete('employee-types/{employee_type}', [EmployeeTypeController::class, 'destroy'])->name('employee-types.destroy');
+
+    // Documents (file library) - CREATE routes first
+    Route::get('documents/create', [DocumentController::class, 'create'])->name('documents.create');
+    Route::post('documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
+    Route::get('documents/{document}/edit', [DocumentController::class, 'edit'])->name('documents.edit');
+    Route::put('documents/{document}', [DocumentController::class, 'update'])->name('documents.update');
+    Route::post('documents/{document}', [DocumentController::class, 'update']); // POST fallback for multipart updates
+    Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+    Route::get('documents/{document}/delete', [DocumentController::class, 'confirmDelete'])->name('documents.confirm-delete');
+    Route::delete('documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
 
     // Locations CRUD (for geofence management)
     Route::get('locations/create', [LocationController::class, 'create'])->name('locations.create');
