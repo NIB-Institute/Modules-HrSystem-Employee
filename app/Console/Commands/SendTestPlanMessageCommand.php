@@ -4,8 +4,12 @@ namespace Modules\Employee\Console\Commands;
 
 use App\Services\Notification\Channels\TelegramChannel;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\App;
 use Modules\Employee\Enums\EmployeePlanAssignmentEnum;
+use Modules\Employee\Enums\EmployeePlanReminderTierEnum;
+use Modules\Employee\Jobs\SendPlanReminderJob;
 use Modules\Employee\Models\EmployeePlan;
+use Modules\Employee\Models\EmployeePlanReminderLog;
 
 /**
  * Sends a test reminder message to the Telegram group configured on a plan,
@@ -20,13 +24,14 @@ use Modules\Employee\Models\EmployeePlan;
  */
 class SendTestPlanMessageCommand extends Command
 {
-    protected $signature = 'employee:telegram:test-plan-message {plan?}';
+    protected $signature = 'employee:telegram:test-plan-message {plan?} {--tier= : group_3d or group_1d to render the actual reminder payload}';
 
-    protected $description = 'Send a test reminder message to a plan\'s configured Telegram group (skips schedule window). Pass plan id or uuid.';
+    protected $description = 'Send a test reminder message to a plan\'s configured Telegram group (skips schedule window). Pass plan id or uuid. Use --tier=group_3d|group_1d to send the real reminder format.';
 
     public function handle(TelegramChannel $telegram): int
     {
         $identifier = $this->argument('plan');
+        $tierOption = $this->option('tier');
 
         if ($identifier === null) {
             $plan = EmployeePlan::whereNotNull('telegram_group_chat_id')->first();
@@ -48,6 +53,34 @@ class SendTestPlanMessageCommand extends Command
             return self::FAILURE;
         }
 
+        // --tier path: dispatch the real reminder Job so we use the actual
+        // reminder payload (bilingual title, etc.). With QUEUE_CONNECTION=sync
+        // this runs immediately.
+        if ($tierOption) {
+            try {
+                $tier = EmployeePlanReminderTierEnum::from($tierOption);
+            } catch (\ValueError) {
+                $this->error("Invalid --tier value: {$tierOption}. Use group_3d or group_1d.");
+                return self::FAILURE;
+            }
+
+            $occurrenceDate = ($plan->start_date ?? now())->toDateString();
+
+            // Clear any existing reminder log for this (plan, occurrence, tier) so the
+            // Job's idempotency guard doesn't short-circuit our test.
+            EmployeePlanReminderLog::where('employee_plan_id', $plan->id)
+                ->where('occurrence_date', $occurrenceDate)
+                ->where('tier', $tier->value)
+                ->delete();
+
+            $this->line("Dispatching SendPlanReminderJob (tier={$tier->value}, occurrence={$occurrenceDate}) for plan \"{$plan->title}\"...");
+
+            SendPlanReminderJob::dispatch($plan->id, $occurrenceDate, $tier->value);
+
+            $this->info('✅ Dispatched. With QUEUE_CONNECTION=sync the message arrived already; otherwise run `php artisan queue:work --once`.');
+            return self::SUCCESS;
+        }
+
         $assignees = $plan->assignments()
             ->whereIn('status', [
                 EmployeePlanAssignmentEnum::STATUS_ASSIGNED,
@@ -62,23 +95,28 @@ class SendTestPlanMessageCommand extends Command
             ? ['  • (no employees assigned yet)']
             : $assignees->map(fn ($e) => '  • ' . trim(($e->first_name ?? '') . ' ' . ($e->last_name ?? '')))->all();
 
-        $bi = fn (string $k): string => trans($k, [], 'en') . ' / ' . trans($k, [], 'km');
-        $sep = '────────────────────';
-        $startDate = $plan->start_date?->translatedFormat('D, M j Y') ?? '—';
+        $prevLocale = App::getLocale();
+        App::setLocale('km');
+        try {
+            $sep = '────────────────────';
+            $startDate = $plan->start_date?->locale('km')->translatedFormat('D, M j Y') ?? '—';
 
-        $body = implode("\n", [
-            '📋 ' . $bi('employee::plan_reminders.labels.workshop_name') . ':',
-            '<b>' . e($plan->title) . '</b>',
-            $sep,
-            '📅 ' . $bi('employee::plan_reminders.labels.date') . ':     ' . $startDate,
-            '⏰ ' . $bi('employee::plan_reminders.labels.time') . ':     ' . ($plan->start_time ?: '—'),
-            '📍 ' . $bi('employee::plan_reminders.labels.location') . ': ' . e($plan->location ?: '—'),
-            $sep,
-            '👥 ' . $bi('employee::plan_reminders.labels.team') . ' (' . $assignees->count() . '):',
-            ...$names,
-            $sep,
-            trans('employee::plan_reminders.test_footer', [], 'en') . ' / ' . trans('employee::plan_reminders.test_footer', [], 'km'),
-        ]);
+            $body = implode("\n", [
+                '📋 ' . __('employee::plan_reminders.labels.workshop_name') . ':',
+                '<b>' . e($plan->title) . '</b>',
+                $sep,
+                '📅 ' . __('employee::plan_reminders.labels.date') . ':     ' . $startDate,
+                '⏰ ' . __('employee::plan_reminders.labels.time') . ':     ' . ($plan->start_time ?: '—'),
+                '📍 ' . __('employee::plan_reminders.labels.location') . ': ' . e($plan->location ?: '—'),
+                $sep,
+                '👥 ' . __('employee::plan_reminders.labels.team') . ' (' . $assignees->count() . '):',
+                ...$names,
+                $sep,
+                (string) __('employee::plan_reminders.footer'),
+            ]);
+        } finally {
+            App::setLocale($prevLocale);
+        }
 
         $this->line("Sending test message to chat_id {$plan->telegram_group_chat_id} for plan \"{$plan->title}\"...");
 

@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Employee\Enums\EmployeePlanAssignmentEnum;
@@ -156,28 +157,35 @@ class SendPlanReminderJob implements ShouldQueue
             ? ($plan->end_time ? "{$plan->start_time} – {$plan->end_time}" : (string) $plan->start_time)
             : '—';
 
-        $bi = fn (string $k): string => trans($k, [], 'en') . ' / ' . trans($k, [], 'km');
-        $dateStr = $occurrence->translatedFormat('D, M j Y');
-        $headerEmoji = trans("{$key}.header_emoji", [], 'en') ?: '📋';
+        $prevLocale = App::getLocale();
+        App::setLocale('km');
+        try {
+            $dateStr = $occurrence->locale('km')->translatedFormat('D, M j Y');
+            $headerEmoji = (string) __("{$key}.header_emoji") ?: '📋';
 
-        $sep = '────────────────────';
+            $sep = '────────────────────';
 
-        $bodyLines = [
-            $headerEmoji . ' ' . $bi('employee::plan_reminders.labels.workshop_name') . ':',
-            '<b>' . e($plan->title ?: '—') . '</b>',
-            $sep,
-            '📅 ' . $bi('employee::plan_reminders.labels.date') . ':     ' . $dateStr,
-            '⏰ ' . $bi('employee::plan_reminders.labels.time') . ':     ' . e($timeRange),
-            '📍 ' . $bi('employee::plan_reminders.labels.location') . ': ' . e($plan->location ?: '—'),
-            $sep,
-            '👥 ' . $bi('employee::plan_reminders.labels.team') . ' (' . count($assignees) . '):',
-            ...$names,
-            $sep,
-        ];
+            $bodyLines = [
+                '<b>' . $headerEmoji . ' ' . e(__("{$key}.title")) . '</b>',
+                $sep,
+                '📋 ' . __('employee::plan_reminders.labels.workshop_name') . ':',
+                '<b>' . e($plan->title ?: '—') . '</b>',
+                $sep,
+                '📅 ' . __('employee::plan_reminders.labels.date') . ':     ' . $dateStr,
+                '⏰ ' . __('employee::plan_reminders.labels.time') . ':     ' . e($timeRange),
+                '📍 ' . __('employee::plan_reminders.labels.location') . ': ' . e($plan->location ?: '—'),
+                $sep,
+                '👥 ' . __('employee::plan_reminders.labels.team') . ' (' . count($assignees) . '):',
+                ...$names,
+                $sep,
+            ];
 
-        return [
-            'title' => '',
-            'body' => implode("\n", $bodyLines),
-        ];
+            return [
+                'title' => '',
+                'body' => implode("\n", $bodyLines),
+            ];
+        } finally {
+            App::setLocale($prevLocale);
+        }
     }
 }

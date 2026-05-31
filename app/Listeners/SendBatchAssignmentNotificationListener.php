@@ -5,6 +5,7 @@ namespace Modules\Employee\Listeners;
 use App\Services\Notification\Channels\TelegramChannel;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Modules\Employee\Enums\EmployeePlanAssignmentEnum;
 use Modules\Employee\Events\EmployeesAssignedToPlan;
@@ -67,27 +68,32 @@ class SendBatchAssignmentNotificationListener implements ShouldQueue
             return '  • ' . e($name);
         })->all();
 
-        $bi = fn (string $key): string => trans($key, [], 'en') . ' / ' . trans($key, [], 'km');
-        $startDate = $plan->start_date?->translatedFormat('D, M j Y') ?? '—';
-        $startTime = $plan->start_time ?: '—';
-        $location = $plan->location ?: '—';
-        $sep = '────────────────────';
+        $prevLocale = App::getLocale();
+        App::setLocale('km');
+        try {
+            $startDate = $plan->start_date?->locale('km')->translatedFormat('D, M j Y') ?? '—';
+            $startTime = $plan->start_time ?: '—';
+            $location = $plan->location ?: '—';
+            $sep = '────────────────────';
 
-        $payload = [
-            'title' => '',
-            'body' => implode("\n", [
-                '📋 ' . $bi('employee::plan_reminders.labels.workshop_name') . ':',
-                '<b>' . e($plan->title ?: '—') . '</b>',
-                $sep,
-                '📅 ' . $bi('employee::plan_reminders.labels.date') . ':     ' . $startDate,
-                '⏰ ' . $bi('employee::plan_reminders.labels.time') . ':     ' . e($startTime),
-                '📍 ' . $bi('employee::plan_reminders.labels.location') . ': ' . e($location),
-                $sep,
-                '👥 ' . $bi('employee::plan_reminders.labels.team') . ' (' . $allAssignments->count() . '):',
-                ...$teamLines,
-                $sep,
-            ]),
-        ];
+            $payload = [
+                'title' => '',
+                'body' => implode("\n", [
+                    '📋 ' . __('employee::plan_reminders.labels.workshop_name') . ':',
+                    '<b>' . e($plan->title ?: '—') . '</b>',
+                    $sep,
+                    '📅 ' . __('employee::plan_reminders.labels.date') . ':     ' . $startDate,
+                    '⏰ ' . __('employee::plan_reminders.labels.time') . ':     ' . e($startTime),
+                    '📍 ' . __('employee::plan_reminders.labels.location') . ': ' . e($location),
+                    $sep,
+                    '👥 ' . __('employee::plan_reminders.labels.team') . ' (' . $allAssignments->count() . '):',
+                    ...$teamLines,
+                    $sep,
+                ]),
+            ];
+        } finally {
+            App::setLocale($prevLocale);
+        }
 
         $result = $this->telegram->sendToChannel($chatId, $payload);
 

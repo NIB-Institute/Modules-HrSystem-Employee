@@ -13,9 +13,11 @@ return [
     ],
     'group_3d' => [
         'header_emoji' => '⏰',
+        'title' => 'Time remaining to join the workshop: 3 days',
     ],
     'group_1d' => [
         'header_emoji' => '🔔',
+        'title' => 'Time remaining to join the workshop: 1 day',
     ],
-    'test_footer' => '(Test message sent from php artisan employee:telegram:test-plan-message)',
+    'footer' => '(Test message sent from php artisan employee:telegram:test-plan-message)',
 ];
