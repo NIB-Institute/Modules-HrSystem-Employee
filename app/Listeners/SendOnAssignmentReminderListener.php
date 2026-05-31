@@ -42,22 +42,26 @@ class SendOnAssignmentReminderListener implements ShouldQueue
         }
 
         $employeeName = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '')) ?: 'An employee';
-        $startDate = $plan->start_date?->format('D, M j Y') ?? '—';
+
+        $bi = fn (string $key): string => trans($key, [], 'en') . ' / ' . trans($key, [], 'km');
+        $startDate = $plan->start_date?->translatedFormat('D, M j Y') ?? '—';
         $startTime = $plan->start_time ?: '—';
         $location = $plan->location ?: '—';
+        $sep = '────────────────────';
 
         $payload = [
-            'title' => (string) __('employee::plan_reminders.on_assignment.title'),
+            'title' => '',
             'body' => implode("\n", [
+                '📋 ' . $bi('employee::plan_reminders.labels.workshop_name') . ':',
                 '<b>' . e($plan->title ?: '—') . '</b>',
-                '',
-                '👤 ' . e($employeeName) . ' has just been assigned.',
-                '',
-                '📅 Date:     ' . $startDate,
-                '⏰ Time:     ' . e($startTime),
-                '📍 Location: ' . e($location),
-                '',
-                (string) __('employee::plan_reminders.on_assignment.footer'),
+                $sep,
+                '📅 ' . $bi('employee::plan_reminders.labels.date') . ':     ' . $startDate,
+                '⏰ ' . $bi('employee::plan_reminders.labels.time') . ':     ' . e($startTime),
+                '📍 ' . $bi('employee::plan_reminders.labels.location') . ': ' . e($location),
+                $sep,
+                '👥 ' . $bi('employee::plan_reminders.labels.team') . ' (1):',
+                '  • ' . e($employeeName),
+                $sep,
             ]),
         ];
 

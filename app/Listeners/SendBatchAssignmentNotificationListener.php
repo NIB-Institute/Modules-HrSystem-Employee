@@ -59,40 +59,33 @@ class SendBatchAssignmentNotificationListener implements ShouldQueue
             return;
         }
 
-        $newIds = array_flip($event->newAssignmentIds);
-        $newCount = 0;
-
-        $teamLines = $allAssignments->map(function ($assignment) use ($newIds, &$newCount) {
+        $teamLines = $allAssignments->map(function ($assignment) {
             $employee = $assignment->employee;
             $name = $employee
                 ? trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''))
                 : '(unknown)';
-            $isNew = isset($newIds[$assignment->id]);
-            if ($isNew) {
-                $newCount++;
-            }
-            return '  • ' . e($name) . ($isNew ? ' 🆕' : '');
+            return '  • ' . e($name);
         })->all();
 
-        $startDate = $plan->start_date?->format('D, M j Y') ?? '—';
+        $bi = fn (string $key): string => trans($key, [], 'en') . ' / ' . trans($key, [], 'km');
+        $startDate = $plan->start_date?->translatedFormat('D, M j Y') ?? '—';
         $startTime = $plan->start_time ?: '—';
         $location = $plan->location ?: '—';
+        $sep = '────────────────────';
 
         $payload = [
-            'title' => (string) __('employee::plan_reminders.on_assignment.title'),
+            'title' => '',
             'body' => implode("\n", [
+                '📋 ' . $bi('employee::plan_reminders.labels.workshop_name') . ':',
                 '<b>' . e($plan->title ?: '—') . '</b>',
-                '',
-                '✨ ' . __('employee::plan_reminders.on_assignment.just_assigned') . ': ' . $newCount,
-                '',
-                '👥 ' . __('employee::plan_reminders.on_assignment.full_team') . ' (' . $allAssignments->count() . '):',
+                $sep,
+                '📅 ' . $bi('employee::plan_reminders.labels.date') . ':     ' . $startDate,
+                '⏰ ' . $bi('employee::plan_reminders.labels.time') . ':     ' . e($startTime),
+                '📍 ' . $bi('employee::plan_reminders.labels.location') . ': ' . e($location),
+                $sep,
+                '👥 ' . $bi('employee::plan_reminders.labels.team') . ' (' . $allAssignments->count() . '):',
                 ...$teamLines,
-                '',
-                '📅 Date:     ' . $startDate,
-                '⏰ Time:     ' . e($startTime),
-                '📍 Location: ' . e($location),
-                '',
-                (string) __('employee::plan_reminders.on_assignment.footer'),
+                $sep,
             ]),
         ];
 
@@ -103,7 +96,6 @@ class SendBatchAssignmentNotificationListener implements ShouldQueue
                 'plan_id' => $plan->id,
                 'chat_id' => $chatId,
                 'team_size' => $allAssignments->count(),
-                'new_count' => $newCount,
                 'error' => $result->error,
             ]);
         }

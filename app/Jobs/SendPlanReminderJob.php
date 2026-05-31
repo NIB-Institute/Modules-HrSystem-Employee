@@ -147,8 +147,6 @@ class SendPlanReminderJob implements ShouldQueue
 
         $key = "employee::plan_reminders.{$tier->value}";
 
-        $title = (string) __("{$key}.title");
-
         $names = array_map(
             static fn ($e) => '  • ' . trim(($e->first_name ?? '') . ' ' . ($e->last_name ?? '')),
             $assignees,
@@ -158,21 +156,27 @@ class SendPlanReminderJob implements ShouldQueue
             ? ($plan->end_time ? "{$plan->start_time} – {$plan->end_time}" : (string) $plan->start_time)
             : '—';
 
+        $bi = fn (string $k): string => trans($k, [], 'en') . ' / ' . trans($k, [], 'km');
+        $dateStr = $occurrence->translatedFormat('D, M j Y');
+        $headerEmoji = trans("{$key}.header_emoji", [], 'en') ?: '📋';
+
+        $sep = '────────────────────';
+
         $bodyLines = [
+            $headerEmoji . ' ' . $bi('employee::plan_reminders.labels.workshop_name') . ':',
             '<b>' . e($plan->title ?: '—') . '</b>',
-            '',
-            '📅 Date:     ' . $occurrence->format('D, M j Y'),
-            '⏰ Time:     ' . e($timeRange),
-            '📍 Location: ' . e($plan->location ?: '—'),
-            '',
-            '👥 Assigned (' . count($assignees) . '):',
+            $sep,
+            '📅 ' . $bi('employee::plan_reminders.labels.date') . ':     ' . $dateStr,
+            '⏰ ' . $bi('employee::plan_reminders.labels.time') . ':     ' . e($timeRange),
+            '📍 ' . $bi('employee::plan_reminders.labels.location') . ': ' . e($plan->location ?: '—'),
+            $sep,
+            '👥 ' . $bi('employee::plan_reminders.labels.team') . ' (' . count($assignees) . '):',
             ...$names,
-            '',
-            (string) __("{$key}.footer"),
+            $sep,
         ];
 
         return [
-            'title' => $title,
+            'title' => '',
             'body' => implode("\n", $bodyLines),
         ];
     }

@@ -62,23 +62,28 @@ class SendTestPlanMessageCommand extends Command
             ? ['  • (no employees assigned yet)']
             : $assignees->map(fn ($e) => '  • ' . trim(($e->first_name ?? '') . ' ' . ($e->last_name ?? '')))->all();
 
+        $bi = fn (string $k): string => trans($k, [], 'en') . ' / ' . trans($k, [], 'km');
+        $sep = '────────────────────';
+        $startDate = $plan->start_date?->translatedFormat('D, M j Y') ?? '—';
+
         $body = implode("\n", [
+            '📋 ' . $bi('employee::plan_reminders.labels.workshop_name') . ':',
             '<b>' . e($plan->title) . '</b>',
-            '',
-            '📅 Date:     ' . ($plan->start_date?->format('D, M j Y') ?? '—'),
-            '⏰ Time:     ' . ($plan->start_time ?: '—'),
-            '📍 Location: ' . e($plan->location ?: '—'),
-            '',
-            '👥 Assigned (' . $assignees->count() . '):',
+            $sep,
+            '📅 ' . $bi('employee::plan_reminders.labels.date') . ':     ' . $startDate,
+            '⏰ ' . $bi('employee::plan_reminders.labels.time') . ':     ' . ($plan->start_time ?: '—'),
+            '📍 ' . $bi('employee::plan_reminders.labels.location') . ': ' . e($plan->location ?: '—'),
+            $sep,
+            '👥 ' . $bi('employee::plan_reminders.labels.team') . ' (' . $assignees->count() . '):',
             ...$names,
-            '',
-            '(This is a test message sent via php artisan employee:telegram:test-plan-message)',
+            $sep,
+            trans('employee::plan_reminders.test_footer', [], 'en') . ' / ' . trans('employee::plan_reminders.test_footer', [], 'km'),
         ]);
 
         $this->line("Sending test message to chat_id {$plan->telegram_group_chat_id} for plan \"{$plan->title}\"...");
 
         $result = $telegram->sendToChannel($plan->telegram_group_chat_id, [
-            'title' => '✅ Test reminder',
+            'title' => '',
             'body' => $body,
         ]);
 
