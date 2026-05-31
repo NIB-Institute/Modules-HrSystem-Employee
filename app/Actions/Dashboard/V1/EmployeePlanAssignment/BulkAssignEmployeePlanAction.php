@@ -4,7 +4,7 @@ namespace Modules\Employee\Actions\Dashboard\V1\EmployeePlanAssignment;
 
 use Illuminate\Support\Facades\DB;
 use Modules\Employee\Enums\EmployeePlanAssignmentEnum;
-use Modules\Employee\Events\EmployeePlanAssignmentCreated;
+use Modules\Employee\Events\EmployeesAssignedToPlan;
 use Modules\Employee\Models\EmployeePlanAssignment;
 
 class BulkAssignEmployeePlanAction
@@ -28,9 +28,9 @@ class BulkAssignEmployeePlanAction
         $skipped = count($employeeIds) - count($toCreate);
 
         $created = 0;
-        $newAssignments = [];
+        $newAssignmentIds = [];
 
-        DB::transaction(function () use ($planId, $toCreate, $notes, &$created, &$newAssignments) {
+        DB::transaction(function () use ($planId, $toCreate, $notes, &$created, &$newAssignmentIds) {
             foreach ($toCreate as $employeeId) {
                 $assignment = EmployeePlanAssignment::create([
                     'employee_plan_id' => $planId,
@@ -39,14 +39,15 @@ class BulkAssignEmployeePlanAction
                     'assigned_at' => now(),
                     'notes' => $notes,
                 ]);
-                $newAssignments[] = $assignment;
+                $newAssignmentIds[] = $assignment->id;
                 $created++;
             }
         });
 
-        // Dispatch on-assignment event for each new assignment (fires Telegram alert per assignee).
-        foreach ($newAssignments as $assignment) {
-            EmployeePlanAssignmentCreated::dispatch($assignment);
+        // Dispatch ONE batch event listing all new assignees — listener posts a
+        // single consolidated Telegram message (not one per assignee).
+        if (! empty($newAssignmentIds)) {
+            EmployeesAssignedToPlan::dispatch($planId, $newAssignmentIds);
         }
 
         return ['created' => $created, 'skipped' => $skipped];
