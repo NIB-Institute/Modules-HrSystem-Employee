@@ -48,6 +48,8 @@ class EmployeeServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\Employee\Console\Commands\SendEmployeePlanRemindersCommand::class,
+            \Modules\Employee\Console\Commands\ShowTelegramChatsCommand::class,
+            \Modules\Employee\Console\Commands\SendTestPlanMessageCommand::class,
         ]);
     }
 
