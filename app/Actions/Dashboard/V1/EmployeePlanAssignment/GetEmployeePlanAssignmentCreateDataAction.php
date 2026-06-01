@@ -6,6 +6,7 @@ use Modules\Employee\Enums\EmployeePlanAssignmentEnum;
 use Modules\Employee\Models\Employee;
 use Modules\Employee\Models\EmployeeAvailability;
 use Modules\Employee\Models\EmployeePlan;
+use Modules\Employee\Models\EmployeePlanAssignment;
 
 class GetEmployeePlanAssignmentCreateDataAction
 {
@@ -52,10 +53,24 @@ class GetEmployeePlanAssignmentCreateDataAction
                 'is_active' => true,
             ]);
 
+        // Map of plan_id => [employee_ids already assigned], so the frontend can
+        // grey-out / skip already-assigned employees per plan and prevent the
+        // user from picking duplicates (which would result in 0 created).
+        $existingAssignments = EmployeePlanAssignment::query()
+            ->whereIn('status', [
+                EmployeePlanAssignmentEnum::STATUS_ASSIGNED,
+                EmployeePlanAssignmentEnum::STATUS_IN_PROGRESS,
+            ])
+            ->get(['employee_plan_id', 'employee_id'])
+            ->groupBy('employee_plan_id')
+            ->map(fn ($rows) => $rows->pluck('employee_id')->values()->all())
+            ->toArray();
+
         return [
             'plans' => $plans,
             'employees' => $employees,
             'availabilities' => $availabilities,
+            'existingAssignments' => $existingAssignments,
             'statuses' => EmployeePlanAssignmentEnum::STATUSES,
             'selectedPlanId' => $planId,
             'selectedEmployeeId' => $employeeId,

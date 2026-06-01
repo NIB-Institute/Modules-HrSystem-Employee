@@ -8,7 +8,7 @@ import TiptapEditor from '@/components/TiptapEditor.vue';
 import { useTranslation } from '@/composables/useTranslation';
 import { useForm } from '@inertiajs/vue3';
 import { useModal } from 'momentum-modal';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import { X, Users } from 'lucide-vue-next';
 
@@ -29,6 +29,7 @@ interface EmployeeOption {
 interface Props {
     plans: PlanOption[];
     employees: EmployeeOption[];
+    existingAssignments?: Record<number, number[]>;
     selectedPlanId?: number | null;
 }
 
@@ -68,6 +69,16 @@ const planValue = computed({
     set: (v) => { form.employee_plan_id = v == null ? null : Number(v); },
 });
 
+// Employees already on the currently-selected plan — these get disabled in the
+// checklist so the user can't accidentally pick them and get "0 created".
+const alreadyAssignedIds = computed<Set<number>>(() => {
+    const planId = form.employee_plan_id;
+    if (!planId || !props.existingAssignments) return new Set<number>();
+    return new Set(props.existingAssignments[planId] ?? []);
+});
+
+const isAlreadyAssigned = (id: number) => alreadyAssignedIds.value.has(id);
+
 const filteredEmployees = computed(() => {
     const q = employeeSearch.value.trim().toLowerCase();
     if (!q) return props.employees;
@@ -77,9 +88,15 @@ const filteredEmployees = computed(() => {
     );
 });
 
+// Employees you can still pick (not already on the plan)
+const selectableEmployees = computed(() =>
+    filteredEmployees.value.filter(e => !isAlreadyAssigned(e.id)),
+);
+
 const isSelected = (id: number) => form.employee_ids.includes(id);
 
 const toggleEmployee = (id: number) => {
+    if (isAlreadyAssigned(id)) return; // guard
     if (isSelected(id)) {
         form.employee_ids = form.employee_ids.filter(x => x !== id);
     } else {
@@ -96,12 +113,18 @@ const selectedEmployees = computed(() =>
 );
 
 const selectAll = () => {
-    form.employee_ids = filteredEmployees.value.map(e => e.id);
+    form.employee_ids = selectableEmployees.value.map(e => e.id);
 };
 
 const clearAll = () => {
     form.employee_ids = [];
 };
+
+// When the user switches plans, drop any previously-checked employees that are
+// already on the newly-selected plan.
+watch(() => form.employee_plan_id, () => {
+    form.employee_ids = form.employee_ids.filter(id => !isAlreadyAssigned(id));
+});
 
 const isFormInvalid = computed(() => !form.employee_plan_id || form.employee_ids.length === 0);
 
@@ -199,16 +222,27 @@ const handleCancel = () => {
                         <label
                             v-for="e in filteredEmployees"
                             :key="e.id"
-                            class="flex items-center gap-3 p-2.5 hover:bg-muted/50 cursor-pointer border-b last:border-b-0"
+                            :class="[
+                                'flex items-center gap-3 p-2.5 border-b last:border-b-0',
+                                isAlreadyAssigned(e.id)
+                                    ? 'opacity-50 cursor-not-allowed bg-muted/30'
+                                    : 'hover:bg-muted/50 cursor-pointer',
+                            ]"
                         >
                             <input
                                 type="checkbox"
                                 :checked="isSelected(e.id)"
+                                :disabled="isAlreadyAssigned(e.id)"
                                 @change="toggleEmployee(e.id)"
-                                class="h-4 w-4 rounded border-input"
+                                class="h-4 w-4 rounded border-input disabled:cursor-not-allowed"
                             />
                             <div class="flex-1 min-w-0">
-                                <div class="text-sm font-medium truncate">{{ e.full_name }}</div>
+                                <div class="text-sm font-medium truncate flex items-center gap-2">
+                                    {{ e.full_name }}
+                                    <Badge v-if="isAlreadyAssigned(e.id)" variant="outline" class="text-[10px] py-0 px-1.5 h-4">
+                                        {{ __('already assigned') }}
+                                    </Badge>
+                                </div>
                                 <div class="text-xs text-muted-foreground truncate">{{ e.employee_code }}</div>
                             </div>
                         </label>
