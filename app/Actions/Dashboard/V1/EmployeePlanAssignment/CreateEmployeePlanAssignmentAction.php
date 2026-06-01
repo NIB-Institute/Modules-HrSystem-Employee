@@ -2,15 +2,20 @@
 
 namespace Modules\Employee\Actions\Dashboard\V1\EmployeePlanAssignment;
 
+use Illuminate\Support\Facades\Log;
 use Modules\Employee\Enums\EmployeePlanAssignmentEnum;
 use Modules\Employee\Events\EmployeePlanAssignmentCreated;
+use Modules\Employee\Listeners\SendOnAssignmentReminderListener;
 use Modules\Employee\Models\EmployeePlan;
 use Modules\Employee\Models\EmployeePlanAssignment;
+use Throwable;
 
 class CreateEmployeePlanAssignmentAction
 {
     public function execute(array $data): EmployeePlanAssignment
     {
+        Log::info('SingleAssign: start', ['data' => $data]);
+
         $data['assigned_at'] ??= now();
         $data['status'] ??= EmployeePlanAssignmentEnum::STATUS_ASSIGNED;
 
@@ -32,8 +37,24 @@ class CreateEmployeePlanAssignmentAction
 
         $fresh = $assignment->fresh();
 
-        // Post on-assignment alert to the plan's Telegram group (queued).
-        EmployeePlanAssignmentCreated::dispatch($fresh);
+        Log::info('SingleAssign: created', ['assignment_id' => $fresh->id]);
+
+        // Post on-assignment alert DIRECTLY (no event/queue indirection)
+        // so we can't lose the call to a misconfigured listener or stuck queue.
+        try {
+            $event = new EmployeePlanAssignmentCreated($fresh);
+            app(SendOnAssignmentReminderListener::class)->handle($event);
+            Log::info('SingleAssign: telegram broadcast completed', ['assignment_id' => $fresh->id]);
+        } catch (Throwable $e) {
+            Log::error('SingleAssign: telegram broadcast FAILED', [
+                'assignment_id' => $fresh->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Still dispatch the event (for any external listeners), but we've
+        // already posted to Telegram via the direct call above.
+        // EmployeePlanAssignmentCreated::dispatch($fresh);  // disabled to avoid double-send
 
         return $fresh;
     }

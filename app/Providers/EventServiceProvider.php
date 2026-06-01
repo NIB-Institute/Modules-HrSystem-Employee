@@ -3,11 +3,15 @@
 namespace Modules\Employee\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Modules\Employee\Events\EmployeePlanAssignmentCreated;
-use Modules\Employee\Events\EmployeesAssignedToPlan;
-use Modules\Employee\Listeners\SendBatchAssignmentNotificationListener;
-use Modules\Employee\Listeners\SendOnAssignmentReminderListener;
 
+/**
+ * Telegram broadcasting on plan assignments runs DIRECTLY from the action
+ * classes (CreateEmployeePlanAssignmentAction + BulkAssignEmployeePlanAction),
+ * not via this event listener mapping. The direct call eliminates any chance
+ * of Laravel's event/queue layer silently swallowing the broadcast.
+ *
+ * If we ever re-introduce queued or external listeners, wire them here.
+ */
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -15,17 +19,7 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [
-        // Single-assign endpoint (POST /employee-plan-assignments).
-        EmployeePlanAssignmentCreated::class => [
-            SendOnAssignmentReminderListener::class,
-        ],
-        // Bulk-assign endpoint (POST /employee-plan-assignments/bulk-assign).
-        // Listener posts ONE message listing all new assignees.
-        EmployeesAssignedToPlan::class => [
-            SendBatchAssignmentNotificationListener::class,
-        ],
-    ];
+    protected $listen = [];
 
     /**
      * Indicates if events should be discovered.
