@@ -13,7 +13,9 @@ class EmployeePlanSeeder extends Seeder
     {
         $createdBy = User::query()->first()?->id;
 
+        // Mix of English + Khmer (ភាសាខ្មែរ) titles so the seeded data exercises both locales.
         $titles = [
+            // English
             'Q1 Onboarding Workshop',
             'Sales Enablement Program',
             'Annual Compliance Training',
@@ -24,22 +26,46 @@ class EmployeePlanSeeder extends Seeder
             'Customer Service Refresher',
             'Cybersecurity Awareness 2026',
             'Performance Review Cycle',
+            // Khmer
+            'សិក្ខាសាលាបណ្តុះបណ្តាលនិយោជិតថ្មី ត្រីមាសទី១',
+            'កម្មវិធីពង្រឹងសមត្ថភាពលក់',
+            'វគ្គបណ្តុះបណ្តាលអនុលោមភាពប្រចាំឆ្នាំ',
+            'វគ្គអភិវឌ្ឍន៍ភាពជាអ្នកដឹកនាំ',
+            'ទិវាសហប្រតិបត្តិការក្រុមឆ្លងផ្នែក',
+            'ការអនុវត្តន៍សុខភាព និងសុវត្ថិភាព',
+            'ដំណើរកម្សាន្តក្រុមហ៊ុនប្រចាំឆ្នាំ',
+            'ការបន្តបណ្តុះបណ្តាលសេវាអតិថិជន',
+            'ការយល់ដឹងសន្តិសុខអ៊ីនធឺណិត ឆ្នាំ២០២៦',
+            'វដ្តពិនិត្យការអនុវត្តន៍ការងារ',
         ];
 
         $descriptionTemplates = [
+            // English
             'Structured program covering key milestones, mentor pairing, and a final review.',
             'Hands-on workshop with daily check-ins and end-of-week deliverables.',
             'Self-paced learning track with weekly progress check-ins.',
             'Cross-functional initiative requiring participation from multiple teams.',
+            // Khmer
+            'កម្មវិធីដែលមានរបៀបវារៈគ្របដណ្តប់លើ កិច្ចសម្គាល់សំខាន់ៗ ការផ្គូផ្គងជាមួយអ្នកណែនាំ និងការត្រួតពិនិត្យចុងក្រោយ។',
+            'សិក្ខាសាលាជាក់ស្តែង ជាមួយការត្រួតពិនិត្យប្រចាំថ្ងៃ និងលទ្ធផលនៅចុងសប្តាហ៍។',
+            'កម្មវិធីសិក្សាដោយខ្លួនឯង ជាមួយការត្រួតពិនិត្យវឌ្ឍនភាពប្រចាំសប្តាហ៍។',
+            'គំនិតផ្តួចផ្តើមឆ្លងផ្នែក ដែលត្រូវការការចូលរួមពីក្រុមច្រើន។',
             null,
         ];
 
         $locations = [
+            // English
             'Head Office - Conference Room A',
             'Head Office - Training Center',
             'Branch Office - Phnom Penh',
             'Online (Zoom)',
             'Hybrid (Office + Remote)',
+            // Khmer
+            'ការិយាល័យកណ្តាល - បន្ទប់ប្រជុំ A',
+            'ការិយាល័យកណ្តាល - មជ្ឈមណ្ឌលបណ្តុះបណ្តាល',
+            'ការិយាល័យសាខា - ភ្នំពេញ',
+            'អនឡាញ (Zoom)',
+            'បន្សំ (ការិយាល័យ + ពីចម្ងាយ)',
             null,
         ];
 
