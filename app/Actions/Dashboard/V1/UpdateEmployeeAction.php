@@ -24,6 +24,14 @@ class UpdateEmployeeAction
                 $data['job_experiences']
             );
 
+            // Sanitize JSON-array columns when present (multiple ID cards / certificates)
+            if (array_key_exists('id_cards', $data)) {
+                $data['id_cards'] = $this->sanitizeJsonRows($data['id_cards'] ?? [], 'number');
+            }
+            if (array_key_exists('certificates', $data)) {
+                $data['certificates'] = $this->sanitizeJsonRows($data['certificates'] ?? [], 'name');
+            }
+
             // Update employee
             $data['updated_by'] = Auth::id();
             $employee->update($data);
@@ -95,6 +103,31 @@ class UpdateEmployeeAction
                 $employee->$relationship()->create($itemData);
             }
         }
+    }
+
+    /**
+     * Sanitize rows destined for a JSON-array column: strip the Vue-only `_key`,
+     * drop rows whose required field is empty, and normalise empty strings to null.
+     */
+    protected function sanitizeJsonRows(array $rows, string $requiredField): array
+    {
+        $clean = [];
+
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            unset($row['_key']);
+
+            if (empty($row[$requiredField])) {
+                continue;
+            }
+
+            $clean[] = $this->cleanEmptyStrings($row);
+        }
+
+        return $clean;
     }
 
     /**

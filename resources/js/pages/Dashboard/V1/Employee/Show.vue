@@ -21,6 +21,7 @@ import {
     Building2,
     Calendar,
     Award,
+    CreditCard,
     Banknote,
     QrCode,
     Clock,
@@ -134,7 +135,7 @@ const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructiv
                             <Badge :variant="employee.status ? 'default' : 'secondary'">{{ employee.status ? __('Active') : __('Inactive') }}</Badge>
                             <Badge v-if="employee.is_on_probation" variant="outline" class="border-orange-400 text-orange-500">{{ __('Probation') }}</Badge>
                         </div>
-                        <p class="text-muted-foreground">{{ employee.job_title || __('Employee') }}</p>
+                        <p class="text-muted-foreground">{{ employee.job_title || __('Employee') }}<span v-if="employee.position"> · {{ employee.position }}</span></p>
                         <p class="text-sm text-muted-foreground font-mono mt-1">{{ employee.employee_code }}</p>
                     </div>
                     <div class="flex items-center gap-2">
@@ -313,6 +314,61 @@ const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructiv
                             <Badge :variant="employee.is_on_probation ? 'outline' : 'default'" :class="employee.is_on_probation ? 'border-orange-400 text-orange-500' : ''">
                                 {{ employee.is_on_probation ? __('In Progress') : __('Completed') }}
                             </Badge>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ID Cards (multiple) -->
+                <div v-if="employee.id_cards && employee.id_cards.length > 0" class="p-6 border-t">
+                    <div class="flex items-center gap-2 mb-3">
+                        <CreditCard class="h-4 w-4 text-muted-foreground" />
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{{ __('ID Cards') }} ({{ employee.id_cards.length }})</h3>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div v-for="(card, index) in employee.id_cards" :key="index" class="rounded-lg border bg-muted/30 p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <Badge variant="secondary">{{ card.type || __('ID Card') }}</Badge>
+                                <span class="text-sm font-mono">{{ card.number || '-' }}</span>
+                            </div>
+                            <div class="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                                <span v-if="card.issued_date">{{ __('Issued') }}: {{ formatDate(card.issued_date) }}</span>
+                                <span v-if="card.expiry_date">{{ __('Expires') }}: {{ formatDate(card.expiry_date) }}</span>
+                            </div>
+                            <div v-if="card.front_url || card.back_url" class="flex flex-wrap gap-3">
+                                <a v-if="card.front_url" :href="card.front_url" target="_blank" class="inline-block">
+                                    <img :src="card.front_url" :alt="`ID Card ${index + 1} front`" class="h-24 rounded-md border object-cover" @error="($event.target as HTMLImageElement).style.display = 'none'" />
+                                </a>
+                                <a v-if="card.back_url" :href="card.back_url" target="_blank" class="inline-block">
+                                    <img :src="card.back_url" :alt="`ID Card ${index + 1} back`" class="h-24 rounded-md border object-cover" @error="($event.target as HTMLImageElement).style.display = 'none'" />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificates (multiple) -->
+                <div v-if="employee.certificates && employee.certificates.length > 0" class="p-6 border-t">
+                    <div class="flex items-center gap-2 mb-3">
+                        <Award class="h-4 w-4 text-muted-foreground" />
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{{ __('Certificates') }} ({{ employee.certificates.length }})</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div v-for="(cert, index) in employee.certificates" :key="index" class="rounded-lg border bg-muted/30 p-4 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <p class="text-sm font-medium">{{ cert.name || '-' }}</p>
+                                    <p v-if="cert.issued_by" class="text-xs text-muted-foreground">{{ cert.issued_by }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p v-if="cert.code" class="text-xs font-mono text-muted-foreground">{{ cert.code }}</p>
+                                    <p v-if="cert.issued_date" class="text-xs text-muted-foreground">{{ formatDate(cert.issued_date) }}</p>
+                                </div>
+                            </div>
+                            <div v-if="cert.images && cert.images.length > 0" class="flex flex-wrap gap-3">
+                                <a v-for="(image, imgIndex) in cert.images" :key="imgIndex" :href="image" target="_blank" class="inline-block">
+                                    <img :src="image" :alt="`${cert.name} ${imgIndex + 1}`" class="h-24 rounded-md border object-cover" @error="($event.target as HTMLImageElement).style.display = 'none'" />
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -63,11 +63,13 @@ class Employee extends Model
         'id_card_back_url',
         'id_card_issued_date',
         'id_card_expiry_date',
+        'id_cards',
         'school_id',
         'department_id',
         'position_id',
         'type_employee_id',
         'job_title',
+        'position',
         'employee_type',
         'anttendent_value',
         'salary',
@@ -78,6 +80,7 @@ class Employee extends Model
         'certificate_image',
         'certificate_images',
         'certificate_code',
+        'certificates',
         'avatar_url',
         'employee_qr_code',
         'employee_barcode',
@@ -99,6 +102,8 @@ class Employee extends Model
         'status' => 'boolean',
         'marital_status' => MaritalStatusEnum::class,
         'certificate_images' => 'array',
+        'id_cards' => 'array',
+        'certificates' => 'array',
     ];
 
     /**

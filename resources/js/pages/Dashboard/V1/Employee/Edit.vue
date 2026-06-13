@@ -83,6 +83,33 @@ const initializeJobExperiences = () => {
     }));
 };
 
+// Initialize ID cards with _key for Vue tracking
+const initializeIdCards = () => {
+    if (!props.employee.id_cards) return [];
+    return props.employee.id_cards.map((card, index) => ({
+        _key: index + 1,
+        type: card.type || '',
+        number: card.number || '',
+        front_url: card.front_url || '',
+        back_url: card.back_url || '',
+        issued_date: card.issued_date || '',
+        expiry_date: card.expiry_date || '',
+    }));
+};
+
+// Initialize certificates with _key for Vue tracking
+const initializeCertificates = () => {
+    if (!props.employee.certificates) return [];
+    return props.employee.certificates.map((cert, index) => ({
+        _key: index + 1,
+        name: cert.name || '',
+        code: cert.code || '',
+        issued_by: cert.issued_by || '',
+        issued_date: cert.issued_date || '',
+        images: cert.images || [],
+    }));
+};
+
 const form = useForm<EmployeeFormData>({
     employee_code: props.employee.employee_code,
     first_name: props.employee.first_name,
@@ -100,11 +127,13 @@ const form = useForm<EmployeeFormData>({
     id_card_back_url: props.employee.id_card_back_url || '',
     id_card_issued_date: props.employee.id_card_issued_date || '',
     id_card_expiry_date: props.employee.id_card_expiry_date || '',
+    id_cards: initializeIdCards(),
     school_id: props.employee.school_id,
     department_id: props.employee.department_id,
     position_id: props.employee.position_id,
     type_employee_id: props.employee.type_employee_id,
     job_title: props.employee.job_title || '',
+    position: props.employee.position || '',
     employee_type: props.employee.employee_type,
     salary: props.employee.salary,
     hire_date: props.employee.hire_date || '',
@@ -113,6 +142,7 @@ const form = useForm<EmployeeFormData>({
     certificate: props.employee.certificate || '',
     certificate_image: props.employee.certificate_image || '',
     certificate_code: props.employee.certificate_code || '',
+    certificates: initializeCertificates(),
     avatar_url: props.employee.avatar_url || '',
     status: props.employee.status,
     certificate_images: props.employee.certificate_images || [],
@@ -144,10 +174,12 @@ const getFormData = () => ({
     id_card_back_url: form.id_card_back_url || null,
     id_card_issued_date: form.id_card_issued_date || null,
     id_card_expiry_date: form.id_card_expiry_date || null,
+    id_cards: form.id_cards,
     school_id: form.school_id,
     department_id: form.department_id,
     position_id: form.position_id,
     job_title: form.job_title || null,
+    position: form.position || null,
     employee_type: form.employee_type,
     salary: form.salary,
     hire_date: form.hire_date || null,
@@ -156,6 +188,7 @@ const getFormData = () => ({
     certificate: form.certificate || null,
     certificate_image: form.certificate_image || null,
     certificate_code: form.certificate_code || null,
+    certificates: form.certificates,
     avatar_url: form.avatar_url || null,
     status: form.status,
     certificate_images: form.certificate_images,

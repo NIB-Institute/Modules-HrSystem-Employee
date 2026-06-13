@@ -58,6 +58,10 @@ class CreateEmployeeAction
                 $userId = $user->id;
             }
 
+            // Sanitize JSON-array columns (multiple ID cards / certificates)
+            $data['id_cards'] = $this->sanitizeJsonRows($data['id_cards'] ?? [], 'number');
+            $data['certificates'] = $this->sanitizeJsonRows($data['certificates'] ?? [], 'name');
+
             // Prepare employee data
             $data['uuid'] = (string) Str::uuid();
             $data['created_by'] = Auth::id();
@@ -159,6 +163,34 @@ class CreateEmployeeAction
             $expData = $this->cleanEmptyStrings($expData);
             $employee->jobExperiences()->create($expData);
         }
+    }
+
+    /**
+     * Sanitize rows destined for a JSON-array column: strip the Vue-only `_key`,
+     * drop rows whose required field is empty, and normalise empty strings to null.
+     *
+     * @param  array  $rows  Raw rows from the request.
+     * @param  string  $requiredField  Row is skipped when this field is empty.
+     */
+    protected function sanitizeJsonRows(array $rows, string $requiredField): array
+    {
+        $clean = [];
+
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            unset($row['_key']);
+
+            if (empty($row[$requiredField])) {
+                continue;
+            }
+
+            $clean[] = $this->cleanEmptyStrings($row);
+        }
+
+        return $clean;
     }
 
     /**

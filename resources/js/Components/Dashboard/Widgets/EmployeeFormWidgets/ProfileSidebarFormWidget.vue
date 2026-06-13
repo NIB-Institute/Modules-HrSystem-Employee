@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ImageUpload } from '@/components/shared';
-import { Camera, Activity, UserCog, FileImage } from 'lucide-vue-next';
+import { Camera, Activity, UserCog } from 'lucide-vue-next';
 import type { InertiaForm } from '@inertiajs/vue3';
 import type { EmployeeFormData } from '../../../../types';
 
@@ -26,26 +26,6 @@ const avatarImages = computed({
     get: () => props.form.avatar_url ? [props.form.avatar_url] : [],
     set: (value: string[]) => {
         props.form.avatar_url = value.length > 0 ? value[0] : '';
-    },
-});
-
-// Certificate images (supports multiple)
-const certificateImages = computed({
-    get: () => {
-        // Handle both array and single string for backwards compatibility
-        if (Array.isArray(props.form.certificate_images)) {
-            return props.form.certificate_images;
-        }
-        // Fallback for old single image field
-        if (props.form.certificate_image) {
-            return [props.form.certificate_image];
-        }
-        return [];
-    },
-    set: (value: string[]) => {
-        props.form.certificate_images = value;
-        // Keep single field updated for backwards compatibility
-        props.form.certificate_image = value.length > 0 ? value[0] : '';
     },
 });
 
@@ -156,25 +136,6 @@ const createAccount = computed({
                 </div>
             </div>
 
-            <!-- Certificate Documents Section -->
-            <div class="space-y-3 border-t pt-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                        <FileImage class="h-4 w-4" />
-                        <span>{{ __('Certificate Documents') }}</span>
-                    </div>
-                    <span class="text-xs text-muted-foreground">{{ __('Max 10 files') }}</span>
-                </div>
-                <ImageUpload
-                    v-model="certificateImages"
-                    label=""
-                    :multiple="true"
-                    :max-files="10"
-                    :max-size="5"
-                    :error="form.errors.certificate_images || form.errors.certificate_image"
-                />
-                <p class="text-xs text-muted-foreground">{{ __('Upload certificates, degrees, or qualification documents') }}</p>
-            </div>
         </CardContent>
     </Card>
 </template>

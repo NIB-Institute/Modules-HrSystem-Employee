@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Employee Module — ER Diagram</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+    @page { size: 33in 30in; margin: 0.5in; }
+    * { box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        margin: 0; padding: 28px 32px; color: #1a2b22; background: #ffffff;
+    }
+    .header { border-bottom: 3px solid #2e7d4f; padding-bottom: 14px; margin-bottom: 22px; }
+    h1 { margin: 0 0 4px; font-size: 26px; color: #1f5135; letter-spacing: .3px; }
+    .sub { color: #5a6b62; font-size: 13px; }
+    .meta { margin-top: 8px; font-size: 12px; color: #6b7c73; }
+    .legend { margin: 14px 0 4px; font-size: 12px; color: #44564c; }
+    .legend b { color: #1f5135; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-weight:700; font-size:11px; margin-right:6px; }
+    .pk { background:#2e7d4f; color:#fff; }
+    .fk { background:#d6efe0; color:#1f5135; }
+    .mermaid { width: 100%; }
+    .note { margin-top:10px; font-size:11.5px; color:#6b7c73; font-style: italic; }
+</style>
+</head>
+<body>
+    <div class="header">
+        <h1>HR System — Employee Module · Entity Relationship Diagram</h1>
+        <div class="sub">Database schema generated from <code>Modules/Employee/database/migrations</code> &nbsp;·&nbsp; Attendance subsystem excluded</div>
+        <div class="meta">
+            <span class="badge pk">PK</span> Primary Key
+            <span class="badge fk">FK</span> Foreign Key
+            &nbsp;·&nbsp; <b>employees</b> is the central entity. <code>school_id</code> / <code>department_id</code> / <code>created_by</code> / <code>uploaded_by</code> reference the School &amp; core User tables (other modules).
+        </div>
+    </div>
+
+    <pre class="mermaid">
+erDiagram
+    employees_types ||--o{ employees : "type_employee_id"
+    employees ||--o{ employee_family_members : "has"
+    employees ||--o{ employee_academic_levels : "has"
+    employees ||--o{ employee_foreign_languages : "speaks"
+    employees ||--o{ employee_job_experiences : "has"
+    employees ||--o{ employee_availability : "defines"
+    employees ||--o{ employee_plan_assignments : "assigned"
+    employees ||--o{ employee_telegram_link_tokens : "links"
+    employees ||--o{ permission_requests : "requests"
+    employee_plan ||--o{ employee_plan_assignments : "scheduled"
+    employee_plan ||--o{ employee_plan_reminder_logs : "reminds"
+    employee_availability ||--o{ employee_plan_assignments : "slot"
+
+    employees {
+        bigint id PK
+        uuid uuid UK
+        string employee_code UK
+        string first_name
+        string last_name
+        string email
+        string phone_number
+        string telegram_chat_id
+        enum gender
+        enum marital_status
+        date date_of_birth
+        string ethnicity
+        string id_card_number
+        json id_cards
+        bigint school_id FK
+        bigint department_id FK
+        bigint type_employee_id FK
+        string job_title
+        string position
+        enum employee_type
+        decimal salary
+        date hire_date
+        date probation_end_date
+        string certificate
+        json certificates
+        string avatar_url
+        string employee_qr_code
+        boolean status
+    }
+
+    employees_types {
+        bigint id PK
+        uuid uuid UK
+        string name
+        text description
+        time time_start
+        time time_end
+        bigint school_id FK
+        boolean status
+    }
+
+    employee_family_members {
+        bigint id PK
+        uuid uuid UK
+        bigint employee_id FK
+        enum relationship
+        string name
+        enum gender
+        date date_of_birth
+        string occupation
+        string phone_number
+        boolean is_emergency_contact
+        boolean is_dependent
+    }
+
+    employee_academic_levels {
+        bigint id PK
+        uuid uuid UK
+        bigint employee_id FK
+        enum level
+        string institution
+        string field_of_study
+        string degree
+        date start_date
+        date end_date
+        decimal gpa
+        string certificate
+    }
+
+    employee_foreign_languages {
+        bigint id PK
+        uuid uuid UK
+        bigint employee_id FK
+        string language
+        enum proficiency
+        string certificate
+        string certificate_score
+    }
+
+    employee_job_experiences {
+        bigint id PK
+        uuid uuid UK
+        bigint employee_id FK
+        string company
+        string position
+        enum employment_type
+        date start_date
+        date end_date
+        boolean is_current
+    }
+
+    employee_plan {
+        bigint id PK
+        uuid uuid UK
+        string title
+        text description
+        date start_date
+        date end_date
+        enum priority
+        enum schedule_mode
+        boolean is_recurring
+        enum recurrence_type
+        enum status
+        bigint created_by FK
+    }
+
+    employee_availability {
+        bigint id PK
+        uuid uuid UK
+        bigint employee_id FK
+        enum day_of_week
+        time start_time
+        time end_time
+        boolean is_active
+    }
+
+    employee_plan_assignments {
+        bigint id PK
+        uuid uuid UK
+        bigint employee_plan_id FK
+        bigint employee_id FK
+        bigint employee_availability_id FK
+        enum status
+        timestamp assigned_at
+        timestamp completed_at
+        timestamp expires_at
+    }
+
+    employee_plan_reminder_logs {
+        bigint id PK
+        bigint employee_plan_id FK
+        date occurrence_date
+        string tier
+        string channel
+        string status
+        timestamp sent_at
+    }
+
+    employee_telegram_link_tokens {
+        bigint id PK
+        bigint employee_id FK
+        string token UK
+        timestamp expires_at
+        timestamp used_at
+    }
+
+    permission_requests {
+        bigint id PK
+        uuid uuid UK
+        bigint employee_id FK
+        enum type
+        text reason
+        date from_date
+        date to_date
+        enum status
+        bigint reviewed_by FK
+    }
+
+    employee_documents {
+        bigint id PK
+        uuid uuid UK
+        string name
+        string original_filename
+        string file_path
+        string mime_type
+        bigint size_bytes
+        bigint uploaded_by FK
+    }
+    </pre>
+
+    <div class="note">employee_documents is a standalone table (no employee_id foreign key) — linked only via uploaded_by → users.</div>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: "base",
+        er: { layoutDirection: "TB", entityPadding: 14, useMaxWidth: false },
+        themeVariables: {
+            primaryColor: "#e8f5ee",
+            primaryBorderColor: "#2e7d4f",
+            primaryTextColor: "#15321f",
+            lineColor: "#2e7d4f",
+            fontSize: "13px"
+        }
+    });
+    window.__mermaidDone = false;
+    window.addEventListener("load", () => {
+        // mermaid renders async; flag when SVG is present
+        const check = setInterval(() => {
+            if (document.querySelector(".mermaid svg")) {
+                clearInterval(check);
+                window.__mermaidDone = true;
+                document.title = "READY-Employee-ERD";
+            }
+        }, 100);
+    });
+</script>
+</body>
+</html>

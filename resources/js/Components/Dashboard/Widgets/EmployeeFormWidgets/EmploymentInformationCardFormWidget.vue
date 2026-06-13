@@ -11,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Building2, Briefcase, DollarSign, Calendar, Award, FileText, Hash } from 'lucide-vue-next';
+import { Building2, Briefcase, DollarSign, Calendar } from 'lucide-vue-next';
 import type { InertiaForm } from '@inertiajs/vue3';
 import type { EmployeeFormData, SchoolOption, DepartmentOption, EmployeeTypeOption } from '../../../../types';
 
@@ -122,6 +122,13 @@ const salaryValue = computed({
                         <Input id="job_title" v-model="form.job_title" type="text" placeholder="e.g. Software Engineer" class="bg-background" />
                         <p v-if="form.errors.job_title" class="text-xs text-destructive">{{ form.errors.job_title }}</p>
                     </div>
+
+                    <!-- Position -->
+                    <div class="space-y-2">
+                        <Label for="position" class="text-xs font-medium">{{ __('Position') }}</Label>
+                        <Input id="position" v-model="form.position" type="text" :placeholder="__('e.g. Head of Department')" class="bg-background" />
+                        <p v-if="form.errors.position" class="text-xs text-destructive">{{ form.errors.position }}</p>
+                    </div>
                 </div>
             </div>
 
@@ -190,31 +197,6 @@ const salaryValue = computed({
                 </div>
             </div>
 
-            <!-- Certification Section -->
-            <div class="space-y-4">
-                <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <Award class="h-4 w-4" />
-                    <span>{{ __('Certification') }}</span>
-                </div>
-                <div class="grid gap-4 sm:grid-cols-2 rounded-lg border bg-muted/30 p-4">
-                    <div class="space-y-2">
-                        <Label for="certificate" class="text-xs font-medium">{{ __('Certificate Name') }}</Label>
-                        <div class="relative">
-                            <FileText class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="certificate" v-model="form.certificate" type="text" placeholder="Bachelor's Degree" class="pl-10 bg-background" />
-                        </div>
-                        <p v-if="form.errors.certificate" class="text-xs text-destructive">{{ form.errors.certificate }}</p>
-                    </div>
-                    <div class="space-y-2">
-                        <Label for="certificate_code" class="text-xs font-medium">{{ __('Certificate Code') }}</Label>
-                        <div class="relative">
-                            <Hash class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="certificate_code" v-model="form.certificate_code" type="text" placeholder="CERT-2024-001" class="pl-10 bg-background" />
-                        </div>
-                        <p v-if="form.errors.certificate_code" class="text-xs text-destructive">{{ form.errors.certificate_code }}</p>
-                    </div>
-                </div>
-            </div>
         </CardContent>
     </Card>
 </template>

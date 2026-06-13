@@ -14,7 +14,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Users, GraduationCap, Languages, Briefcase, ChevronDown, FolderOpen, Plus } from 'lucide-vue-next';
+import { Users, GraduationCap, Languages, Briefcase, ChevronDown, FolderOpen, Plus, CreditCard, Award, Hash } from 'lucide-vue-next';
+import { ImageUpload } from '@/components/shared';
 import {
     FormItemCard,
     FamilyMemberCard,
@@ -22,7 +23,6 @@ import {
     BasicInformationCard,
     EmploymentInformationCard,
     ProfileSidebar,
-    CertificationCard,
 } from './Widgets/EmployeeFormWidgets';
 import type { InertiaForm } from '@inertiajs/vue3';
 import type {
@@ -40,6 +40,8 @@ import type {
     AcademicLevelFormData,
     ForeignLanguageFormData,
     JobExperienceFormData,
+    IdCardFormData,
+    CertificateFormData,
     AcademicLevel,
     LanguageProficiency,
     EmploymentType,
@@ -201,6 +203,44 @@ const getEmploymentType = (item: JobExperienceFormData) => computed({
     get: () => item.employment_type || undefined,
     set: (v: string | undefined) => { item.employment_type = (v as EmploymentType) || null; },
 });
+
+// ========== ID CARDS ==========
+let idCardKeyCounter = ref(
+    props.form.id_cards?.length > 0
+        ? Math.max(...props.form.id_cards.map((c) => c._key || 0)) + 1
+        : 0
+);
+
+const createEmptyIdCard = (): IdCardFormData => ({
+    _key: ++idCardKeyCounter.value,
+    type: '', number: '', front_url: '', back_url: '', issued_date: '', expiry_date: '',
+});
+
+const addIdCard = () => {
+    if (!props.form.id_cards) props.form.id_cards = [];
+    props.form.id_cards.push(createEmptyIdCard());
+};
+
+const removeIdCard = (index: number) => props.form.id_cards.splice(index, 1);
+
+// ========== CERTIFICATES ==========
+let certificateKeyCounter = ref(
+    props.form.certificates?.length > 0
+        ? Math.max(...props.form.certificates.map((c) => c._key || 0)) + 1
+        : 0
+);
+
+const createEmptyCertificate = (): CertificateFormData => ({
+    _key: ++certificateKeyCounter.value,
+    name: '', code: '', issued_by: '', issued_date: '', images: [],
+});
+
+const addCertificate = () => {
+    if (!props.form.certificates) props.form.certificates = [];
+    props.form.certificates.push(createEmptyCertificate());
+};
+
+const removeCertificate = (index: number) => props.form.certificates.splice(index, 1);
 </script>
 
 <template>
@@ -251,7 +291,79 @@ const getEmploymentType = (item: JobExperienceFormData) => computed({
 
             <EmploymentInformationCard :form="form" :schools="schools" :departments="departments" :employee-types="employeeTypes" @school-change="emit('schoolChange', $event)" />
 
-            <CertificationCard :form="form" />
+            <!-- ID Cards (multiple) -->
+            <Card>
+                <CardHeader class="pb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <CardTitle class="flex items-center gap-2 text-base">
+                                <CreditCard class="h-4 w-4 text-primary" /> {{ __('ID Cards') }}
+                            </CardTitle>
+                            <CardDescription>{{ __('National ID, passport, driver license, etc. Add as many as needed.') }}</CardDescription>
+                        </div>
+                        <Button type="button" variant="outline" size="sm" class="gap-1.5" @click="addIdCard">
+                            <Plus class="h-3.5 w-3.5" /><span>{{ __('Add Card') }}</span>
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent class="space-y-3">
+                    <FormItemCard v-for="(item, idx) in form.id_cards" :key="item._key" :title="__('Card')" :index="idx" @remove="removeIdCard(idx)">
+                        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            <div class="space-y-2"><Label class="text-xs font-medium">{{ __('Card Type') }}</Label><Input v-model="item.type" :placeholder="__('National ID, Passport...')" class="bg-background" /></div>
+                            <div class="space-y-2"><Label class="text-xs font-medium">{{ __('ID Card Number') }} <span class="text-destructive">*</span></Label><Input v-model="item.number" :placeholder="__('e.g. 010101010')" class="bg-background" /></div>
+                            <div class="space-y-2"><Label class="text-xs font-medium">{{ __('Issued Date') }}</Label><Input v-model="item.issued_date" type="date" class="bg-background" /></div>
+                            <div class="space-y-2"><Label class="text-xs font-medium">{{ __('Expiry Date') }}</Label><Input v-model="item.expiry_date" type="date" class="bg-background" /></div>
+                        </div>
+                        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                            <div class="space-y-2">
+                                <Label class="text-xs font-medium">{{ __('ID Card Front') }}</Label>
+                                <ImageUpload :model-value="item.front_url ? [item.front_url] : []" @update:model-value="(v: string[]) => item.front_url = v.length > 0 ? v[0] : ''" label="" :multiple="false" :max-files="1" :max-size="5" />
+                            </div>
+                            <div class="space-y-2">
+                                <Label class="text-xs font-medium">{{ __('ID Card Back') }}</Label>
+                                <ImageUpload :model-value="item.back_url ? [item.back_url] : []" @update:model-value="(v: string[]) => item.back_url = v.length > 0 ? v[0] : ''" label="" :multiple="false" :max-files="1" :max-size="5" />
+                            </div>
+                        </div>
+                    </FormItemCard>
+                    <div v-if="!form.id_cards?.length" class="flex items-center justify-center rounded-lg border border-dashed bg-muted/20 p-6">
+                        <p class="text-sm text-muted-foreground">{{ __('No ID cards added yet.') }}</p>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <!-- Certificates (multiple) -->
+            <Card>
+                <CardHeader class="pb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <CardTitle class="flex items-center gap-2 text-base">
+                                <Award class="h-4 w-4 text-primary" /> {{ __('Certificates') }}
+                            </CardTitle>
+                            <CardDescription>{{ __('Qualifications and credentials. Add as many as needed.') }}</CardDescription>
+                        </div>
+                        <Button type="button" variant="outline" size="sm" class="gap-1.5" @click="addCertificate">
+                            <Plus class="h-3.5 w-3.5" /><span>{{ __('Add Certificate') }}</span>
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent class="space-y-3">
+                    <FormItemCard v-for="(item, idx) in form.certificates" :key="item._key" :title="__('Certificate')" :index="idx" @remove="removeCertificate(idx)">
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div class="space-y-2"><Label class="text-xs font-medium">{{ __('Certificate Name') }} <span class="text-destructive">*</span></Label><Input v-model="item.name" :placeholder="__('Bachelor\'s Degree')" class="bg-background" /></div>
+                            <div class="space-y-2"><Label class="text-xs font-medium">{{ __('Certificate Code') }}</Label><Input v-model="item.code" placeholder="CERT-2024-001" class="bg-background" /></div>
+                            <div class="space-y-2"><Label class="text-xs font-medium">{{ __('Issued By') }}</Label><Input v-model="item.issued_by" :placeholder="__('Institution / Authority')" class="bg-background" /></div>
+                            <div class="space-y-2"><Label class="text-xs font-medium">{{ __('Issued Date') }}</Label><Input v-model="item.issued_date" type="date" class="bg-background" /></div>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <Label class="text-xs font-medium">{{ __('Certificate Images') }}</Label>
+                            <ImageUpload v-model="item.images" label="" :multiple="true" :max-files="10" :max-size="5" />
+                        </div>
+                    </FormItemCard>
+                    <div v-if="!form.certificates?.length" class="flex items-center justify-center rounded-lg border border-dashed bg-muted/20 p-6">
+                        <p class="text-sm text-muted-foreground">{{ __('No certificates added yet.') }}</p>
+                    </div>
+                </CardContent>
+            </Card>
 
             <!-- Background Card (Education, Languages, Experience) -->
             <Card>

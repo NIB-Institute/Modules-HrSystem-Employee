@@ -74,6 +74,44 @@ export interface AcademicLevelFormData {
     notes: string;
 }
 
+// ID Card Types (multiple cards per employee)
+export interface IdCardFormData {
+    _key: number;
+    type: string;
+    number: string;
+    front_url: string;
+    back_url: string;
+    issued_date: string;
+    expiry_date: string;
+}
+
+export interface IdCardData {
+    type: string | null;
+    number: string | null;
+    front_url: string | null;
+    back_url: string | null;
+    issued_date: string | null;
+    expiry_date: string | null;
+}
+
+// Certificate Types (multiple certificates per employee)
+export interface CertificateFormData {
+    _key: number;
+    name: string;
+    code: string;
+    issued_by: string;
+    issued_date: string;
+    images: string[];
+}
+
+export interface CertificateData {
+    name: string | null;
+    code: string | null;
+    issued_by: string | null;
+    issued_date: string | null;
+    images: string[] | null;
+}
+
 // Foreign Language Types
 export interface ForeignLanguageData {
     id?: number;
@@ -161,11 +199,13 @@ export interface Employee {
     id_card_back_url: string | null;
     id_card_issued_date: string | null;
     id_card_expiry_date: string | null;
+    id_cards: IdCardData[] | null;
     school_id: number | null;
     department_id: number | null;
     position_id: number | null;
     type_employee_id: number | null;
     job_title: string | null;
+    position: string | null;
     employee_type: EmployeeType | null;
     employee_type_label: string | null;
     employee_type_name: string | null;
@@ -177,6 +217,7 @@ export interface Employee {
     certificate_image: string | null;
     certificate_images: string[] | null;
     certificate_code: string | null;
+    certificates: CertificateData[] | null;
     avatar_url: string | null;
     employee_qr_code: string | null;
     employee_barcode: string | null;
@@ -297,11 +338,13 @@ export interface EmployeeFormData {
     id_card_back_url: string;
     id_card_issued_date: string;
     id_card_expiry_date: string;
+    id_cards: IdCardFormData[];
     school_id: number | null;
     department_id: number | null;
     position_id: number | null;
     type_employee_id: number | null;
     job_title: string;
+    position: string;
     employee_type: EmployeeType | null;
     salary: number | null;
     hire_date: string;
@@ -311,6 +354,7 @@ export interface EmployeeFormData {
     certificate_image: string;
     certificate_images: string[];
     certificate_code: string;
+    certificates: CertificateFormData[];
     avatar_url: string;
     status: boolean;
     // Family members

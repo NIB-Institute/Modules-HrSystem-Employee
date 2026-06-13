@@ -41,6 +41,7 @@ class UpdateEmployeeRequest extends FormRequest
             'department_id' => ['nullable', 'integer', 'exists:school_departments,id'],
             'position_id' => ['nullable', 'integer'],
             'job_title' => ['nullable', 'string', 'max:100'],
+            'position' => ['nullable', 'string', 'max:100'],
             'employee_type' => ['nullable', 'string', 'in:' . implode(',', array_keys(Employee::getEmployeeTypes()))],
             'salary' => ['nullable', 'numeric', 'min:0'],
             'hire_date' => ['nullable', 'date'],
@@ -53,6 +54,24 @@ class UpdateEmployeeRequest extends FormRequest
             'certificate_code' => ['nullable', 'string', 'max:100'],
             'avatar_url' => ['nullable', 'string'],
             'status' => ['required', 'boolean'],
+
+            // ID cards (multiple)
+            'id_cards' => ['nullable', 'array'],
+            'id_cards.*.type' => ['nullable', 'string', 'max:100'],
+            'id_cards.*.number' => ['nullable', 'string', 'max:50'],
+            'id_cards.*.front_url' => ['nullable', 'string'],
+            'id_cards.*.back_url' => ['nullable', 'string'],
+            'id_cards.*.issued_date' => ['nullable', 'date', 'before_or_equal:today'],
+            'id_cards.*.expiry_date' => ['nullable', 'date', 'after:id_cards.*.issued_date'],
+
+            // Certificates (multiple)
+            'certificates' => ['nullable', 'array'],
+            'certificates.*.name' => ['required', 'string', 'max:255'],
+            'certificates.*.code' => ['nullable', 'string', 'max:100'],
+            'certificates.*.issued_by' => ['nullable', 'string', 'max:255'],
+            'certificates.*.issued_date' => ['nullable', 'date'],
+            'certificates.*.images' => ['nullable', 'array'],
+            'certificates.*.images.*' => ['nullable', 'string'],
 
             // Family members
             'family_members' => ['nullable', 'array'],
@@ -128,6 +147,8 @@ class UpdateEmployeeRequest extends FormRequest
             'id_card_number.unique' => 'This ID card number is already in use.',
             'id_card_issued_date.before_or_equal' => 'ID card issued date cannot be in the future.',
             'id_card_expiry_date.after' => 'ID card expiry date must be after the issued date.',
+            'id_cards.*.expiry_date.after' => 'ID card expiry date must be after the issued date.',
+            'certificates.*.name.required' => 'Certificate name is required.',
             // Family member validation messages
             'family_members.*.relationship.required' => 'Family member relationship is required.',
             'family_members.*.relationship.in' => 'Invalid family relationship selected.',
